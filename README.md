@@ -52,6 +52,11 @@ If `mise` or `asdf` is available, the script will use it to install the pinned t
 No runnable API entrypoint exists yet.
 Service bootstrap and local run commands will be added in later Phase 1 tasks.
 
+## Container
+- Build placeholder image: `docker build -t backend-api:local .`
+- The image packages a minimal placeholder HTTP server for the Docker baseline
+- Placeholder routes currently serve `/` and `/healthz` only, pending the real API skeleton in Phase 2
+
 ## Test
 No automated test suite is configured yet.
 Linting, formatting, and test commands will be introduced incrementally in later tasks.

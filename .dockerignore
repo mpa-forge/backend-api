@@ -1,0 +1,11 @@
+.git
+.github
+bin
+dist
+coverage
+docs
+scripts
+.env
+.env.local
+.DS_Store
+Thumbs.db
