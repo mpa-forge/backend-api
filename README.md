@@ -15,6 +15,11 @@ Go API service repository for the platform blueprint.
 - Go `1.24.12`
 - Version pin source: `.tool-versions` and `go.mod`
 
+Windows note:
+- use a POSIX-friendly GNU Make such as `ezwinports.make` or MSYS2 `make`
+- ensure Git for Windows `bash.exe` is on `PATH`
+- do not use `GnuWin32` make for this repo
+
 ## Setup
 Before running bootstrap:
 - Required: GNU Make (or a compatible `make` implementation) and a bash-compatible shell
