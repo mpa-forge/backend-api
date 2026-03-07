@@ -34,6 +34,20 @@ If `mise` or `asdf` is available, the script will use it to install the pinned t
 - Apply formatting: `make format`
 - Check formatting only: `make format-check`
 
+## Environment
+- Copy `.env.example` to `.env` for local development
+- Required local baseline variables:
+  - `APP_ENV`
+  - `LOG_LEVEL`
+  - `HTTP_PORT`
+  - `DATABASE_URL`
+- Planned now and enforced once the runtime exists in Phase 2:
+  - `AUTH_ISSUER_URL`
+  - `AUTH_AUDIENCE`
+  - `OTEL_MODE`
+  - `OTEL_EXPORTER_OTLP_ENDPOINT`
+  - `OTEL_EXPORTER_OTLP_HEADERS`
+
 ## Run
 No runnable API entrypoint exists yet.
 Service bootstrap and local run commands will be added in later Phase 1 tasks.
