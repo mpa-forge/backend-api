@@ -49,13 +49,28 @@ If `mise` or `asdf` is available, the script will use it to install the pinned t
   - `OTEL_EXPORTER_OTLP_HEADERS`
 
 ## Run
-No runnable API entrypoint exists yet.
-Service bootstrap and local run commands will be added in later Phase 1 tasks.
+For native API work:
+
+- Start support services from this repo: `make support-up`
+- Run the API locally: `make run`
+- Stop support services: `make support-down`
+
+The placeholder API serves on `http://localhost:8080`.
+Support services come from the centralized compose stack in `../platform-infra`.
+After code changes, rerun `make run` to restart the native API process.
 
 ## Container
 - Build placeholder image: `docker build -t backend-api:local .`
 - The image packages a minimal placeholder HTTP server for the Docker baseline
 - Placeholder routes currently serve `/` and `/healthz` only, pending the real API skeleton in Phase 2
+
+## Local Stack
+
+- API-focused mode:
+  - run `make support-up`
+  - run `make run`
+  - compose provides `frontend-web` on `http://localhost:3000` and Postgres on `localhost:5432`
+- Frontend-focused mode is orchestrated from `frontend-web`, where compose provides the containerized API on `http://localhost:8080`
 
 ## Test
 No automated test suite is configured yet.

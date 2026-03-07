@@ -2,8 +2,13 @@ SHELL := bash
 
 GO_VERSION := 1.24.12
 GOLANGCI_LINT_VERSION := v1.64.8
+PLATFORM_INFRA_DIR := ../platform-infra
+APP_ENV ?= local
+LOG_LEVEL ?= debug
+HTTP_PORT ?= 8080
+DATABASE_URL ?= postgres://postgres:postgres@localhost:5432/platform_blueprint?sslmode=disable
 
-.PHONY: help bootstrap install-tools check-tools print-toolchain install-dev-tools precommit-install precommit-run lint format format-check repo-lint repo-format repo-format-check
+.PHONY: help bootstrap install-tools check-tools print-toolchain install-dev-tools precommit-install precommit-run lint format format-check repo-lint repo-format repo-format-check run support-up support-down support-logs support-ps
 
 help:
 	@echo "Targets:"
@@ -17,6 +22,11 @@ help:
 	@echo "  lint              Run repo lint checks"
 	@echo "  format            Apply repo formatting"
 	@echo "  format-check      Check repo formatting without writing changes"
+	@echo "  run               Run the placeholder API locally on port $(HTTP_PORT)"
+	@echo "  support-up        Start postgres + frontend-web from platform-infra"
+	@echo "  support-down      Stop the shared local compose stack"
+	@echo "  support-logs      Stream postgres + frontend-web logs"
+	@echo "  support-ps        Show shared local compose stack status"
 
 bootstrap: install-tools check-tools install-dev-tools
 	@if find . -name '*.go' -not -path './vendor/*' | grep -q .; then \
@@ -91,3 +101,18 @@ repo-format-check:
 	else \
 		echo "No Go files yet; skipping Go format check."; \
 	fi
+
+run:
+	APP_ENV=$(APP_ENV) LOG_LEVEL=$(LOG_LEVEL) HTTP_PORT=$(HTTP_PORT) DATABASE_URL=$(DATABASE_URL) go run ./cmd/api-placeholder
+
+support-up:
+	$(MAKE) -C $(PLATFORM_INFRA_DIR) local-api-support-up
+
+support-down:
+	$(MAKE) -C $(PLATFORM_INFRA_DIR) local-down
+
+support-logs:
+	$(MAKE) -C $(PLATFORM_INFRA_DIR) local-api-support-logs
+
+support-ps:
+	$(MAKE) -C $(PLATFORM_INFRA_DIR) local-ps
