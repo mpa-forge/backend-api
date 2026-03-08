@@ -12,7 +12,7 @@ Go API service repository for the platform blueprint.
 
 ## Toolchain
 - GNU Make (or a compatible `make` implementation) and a bash-compatible shell
-- Go `1.24.12`
+- Go `1.25.1`
 - Version pin source: `.tool-versions` and `go.mod`
 
 Windows note:
@@ -80,3 +80,4 @@ After code changes, rerun `make run` to restart the native API process.
 ## Test
 No automated test suite is configured yet.
 Linting, formatting, and test commands will be introduced incrementally in later tasks.
+

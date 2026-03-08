@@ -1,6 +1,6 @@
 SHELL := bash
 
-GO_VERSION := 1.24.12
+GO_VERSION := 1.25.1
 GOLANGCI_LINT_VERSION := v1.64.8
 PLATFORM_INFRA_DIR := ../platform-infra
 APP_ENV ?= local
@@ -116,3 +116,4 @@ support-logs:
 
 support-ps:
 	$(MAKE) -C $(PLATFORM_INFRA_DIR) local-ps
+
