@@ -1,0 +1,7 @@
+{
+  "worker_id": "worker-01",
+  "repo": "mpa-forge/backend-api",
+  "run_id": "worker-01-1774123773698215838",
+  "acquired_at": "2026-03-21T20:09:36.856384361Z",
+  "base_branch": "main"
+}
