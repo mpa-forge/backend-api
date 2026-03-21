@@ -62,14 +62,14 @@ For native API work:
 - Run the API locally: `make run`
 - Stop support services: `make support-down`
 
-The placeholder API serves on `http://localhost:8080`.
+The API skeleton serves on `http://localhost:8080`.
 Support services come from the centralized compose stack in `../platform-infra`.
 After code changes, rerun `make run` to restart the native API process.
 
 ## Container
-- Build placeholder image: `docker build -t backend-api:local .`
-- The image packages a minimal placeholder HTTP server for the Docker baseline
-- Placeholder routes currently serve `/` and `/healthz` only, pending the real API skeleton in Phase 2
+- Build local image: `docker build -t backend-api:local .`
+- The image packages the minimal API runtime skeleton
+- Local routes currently serve `/`, `/healthz`, `/readyz`, and a Connect-aware placeholder at `/rpc/*`
 
 ## Local Stack
 
@@ -82,4 +82,3 @@ After code changes, rerun `make run` to restart the native API process.
 ## Test
 No automated test suite is configured yet.
 Linting, formatting, and test commands will be introduced incrementally in later tasks.
-

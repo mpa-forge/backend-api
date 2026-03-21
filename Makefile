@@ -23,7 +23,7 @@ help:
 	@echo "  lint              Run repo lint checks"
 	@echo "  format            Apply repo formatting"
 	@echo "  format-check      Check repo formatting without writing changes"
-	@echo "  run               Run the placeholder API locally on port $(HTTP_PORT)"
+	@echo "  run               Run the API skeleton locally on port $(HTTP_PORT)"
 	@echo "  support-up        Start postgres + frontend-web from platform-infra"
 	@echo "  support-down      Stop the shared local compose stack"
 	@echo "  support-logs      Stream postgres + frontend-web logs"
@@ -113,7 +113,7 @@ repo-format-check:
 	fi
 
 run:
-	APP_ENV=$(APP_ENV) LOG_LEVEL=$(LOG_LEVEL) HTTP_PORT=$(HTTP_PORT) DATABASE_URL=$(DATABASE_URL) go run ./cmd/api-placeholder
+	APP_ENV=$(APP_ENV) LOG_LEVEL=$(LOG_LEVEL) HTTP_PORT=$(HTTP_PORT) DATABASE_URL=$(DATABASE_URL) go run ./cmd/api
 
 support-up:
 	$(MAKE) -C $(PLATFORM_INFRA_DIR) local-api-support-up
@@ -126,4 +126,3 @@ support-logs:
 
 support-ps:
 	$(MAKE) -C $(PLATFORM_INFRA_DIR) local-ps
-
