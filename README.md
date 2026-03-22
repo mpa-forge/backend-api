@@ -92,6 +92,24 @@ For native API work:
 Support services come from the centralized compose stack in `../platform-infra`.
 After code changes, rerun `make run` to restart the native API process.
 
+## Database
+
+The API now carries repo-local Postgres migration and seed tooling using
+`golang-migrate` and embedded SQL files.
+
+- Apply schema migrations: `make migrate-up`
+- Apply deterministic seed data: `make db-seed`
+- Apply schema + seed baseline: `make db-prepare`
+- Roll back all schema migrations: `make migrate-down`
+
+Typical local flow:
+
+1. start support services: `make support-up`
+2. apply schema + seed baseline: `make db-prepare`
+3. run the API: `make run`
+
+See `docs/database-migrations.md` for details.
+
 ## Container
 
 - Build a local image: `docker build -t backend-api:local .`
