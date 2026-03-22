@@ -3,11 +3,6 @@ SHELL := bash
 GO_VERSION := 1.25.1
 GOLANGCI_LINT_VERSION := v1.64.8
 PLATFORM_INFRA_DIR := ../platform-infra
-APP_ENV ?= local
-LOG_LEVEL ?= debug
-HTTP_PORT ?= 8080
-DATABASE_URL ?= postgres://postgres:postgres@localhost:5432/platform_blueprint?sslmode=disable
-
 .PHONY: help bootstrap doctor install-tools check-tools print-toolchain install-dev-tools precommit-install precommit-run lint format format-check repo-lint repo-format repo-format-check run support-up support-down support-logs support-ps
 
 help:
@@ -23,7 +18,7 @@ help:
 	@echo "  lint              Run repo lint checks"
 	@echo "  format            Apply repo formatting"
 	@echo "  format-check      Check repo formatting without writing changes"
-	@echo "  run               Run the placeholder API locally on port $(HTTP_PORT)"
+	@echo "  run               Run the API locally using env from .env when present"
 	@echo "  support-up        Start postgres + frontend-web from platform-infra"
 	@echo "  support-down      Stop the shared local compose stack"
 	@echo "  support-logs      Stream postgres + frontend-web logs"
@@ -113,7 +108,12 @@ repo-format-check:
 	fi
 
 run:
-	APP_ENV=$(APP_ENV) LOG_LEVEL=$(LOG_LEVEL) HTTP_PORT=$(HTTP_PORT) DATABASE_URL=$(DATABASE_URL) go run ./cmd/api-placeholder
+	@set -a; \
+	if [[ -f .env ]]; then \
+		source .env; \
+	fi; \
+	set +a; \
+	go run ./cmd/api
 
 support-up:
 	$(MAKE) -C $(PLATFORM_INFRA_DIR) local-api-support-up
@@ -126,4 +126,3 @@ support-logs:
 
 support-ps:
 	$(MAKE) -C $(PLATFORM_INFRA_DIR) local-ps
-
