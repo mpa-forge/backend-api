@@ -12,8 +12,10 @@ import (
 	"strconv"
 	"time"
 
+	"connectrpc.com/connect"
 	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
+	"github.com/mpa-forge/backend-api/internal/auth"
 	"github.com/mpa-forge/backend-api/internal/config"
 	"github.com/mpa-forge/platform-contracts/gen/go/blueprint/user/v1/userv1connect"
 )
@@ -24,7 +26,7 @@ const shutdownTimeout = 10 * time.Second
 func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, userService userv1connect.UserServiceHandler) error {
 	server := &http.Server{
 		Addr:              net.JoinHostPort("", strconv.Itoa(cfg.HTTPPort)),
-		Handler:           newRouter(cfg, logger, userService),
+		Handler:           newRouter(cfg, logger, auth.NewClerkVerifier(cfg.AuthIssuerURL, cfg.AuthAudience), userService),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,
 		WriteTimeout:      15 * time.Second,
@@ -66,7 +68,7 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, userServic
 	return nil
 }
 
-func newRouter(cfg config.Config, logger *slog.Logger, userService userv1connect.UserServiceHandler) http.Handler {
+func newRouter(cfg config.Config, logger *slog.Logger, verifier auth.Verifier, userService userv1connect.UserServiceHandler) http.Handler {
 	router := chi.NewRouter()
 	router.Use(chimiddleware.RequestID)
 	router.Use(chimiddleware.RealIP)
@@ -98,7 +100,7 @@ func newRouter(cfg config.Config, logger *slog.Logger, userService userv1connect
 		})
 	})
 
-	path, handler := userv1connect.NewUserServiceHandler(userService)
+	path, handler := userv1connect.NewUserServiceHandler(userService, connect.WithInterceptors(auth.NewAuthInterceptor(verifier)))
 	router.Mount(path, handler)
 
 	return router

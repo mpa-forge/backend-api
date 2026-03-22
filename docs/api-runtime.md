@@ -55,6 +55,31 @@ Typical local flow:
   - readiness response for the in-process runtime skeleton
 - `POST /blueprint.user.v1.UserService/GetCurrentUser`
   - generated Connect handler mounted through `chi`
+  - requires `Authorization: Bearer <Clerk session token>`
 
-The `UserService` response is still deterministic placeholder data until auth
-and database wiring land in later Phase 2 tasks.
+## Authentication
+
+Protected Connect procedures use a Connect interceptor that:
+
+- extracts the bearer token from the `Authorization` header
+- verifies the JWT signature against Clerk JWKS at `AUTH_ISSUER_URL/.well-known/jwks.json`
+- enforces `iss` against `AUTH_ISSUER_URL`
+- enforces `aud` against `AUTH_AUDIENCE`
+- maps token role claims into internal `user` or `admin` roles
+
+The runtime accepts the following token claim shape for the baseline:
+
+- required identity: `sub`
+- optional profile fields: `email`, `display_name`, `given_name`, `family_name`
+- optional role fields: `role` or `roles`
+
+If no recognized role claim is present, the API defaults the caller to `user`.
+If a role claim is present but does not map to `user` or `admin`, the API
+rejects the request with `403`.
+
+`GetCurrentUser` now reflects the authenticated principal from the verified
+token. Database-backed user enrichment still lands in later Phase 2 tasks.
+
+Implementation details:
+
+- `docs/auth-implementation.md`
