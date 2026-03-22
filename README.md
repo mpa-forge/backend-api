@@ -45,6 +45,7 @@ If `mise` or `asdf` is available, the script will use it to install the pinned t
 - Install git hooks: `make precommit-install`
 - Run all pre-commit checks manually: `make precommit-run`
 - Run repo lint checks: `make lint`
+- Run the Go test suite: `make test`
 - Apply formatting: `make format`
 - Check formatting only: `make format-check`
 
@@ -85,6 +86,7 @@ After code changes, rerun `make run` to restart the native API process.
 - Build a local image: `docker build -t backend-api:local .`
 - The image packages the `cmd/api` runtime skeleton
 - Runtime configuration is still supplied through environment variables at container start
+- The container healthcheck follows the configured `HTTP_PORT`
 
 ## Local Stack
 
@@ -96,5 +98,7 @@ After code changes, rerun `make run` to restart the native API process.
 
 ## Test
 
-No automated test suite is configured yet.
-Linting, formatting, and test commands will be introduced incrementally in later tasks.
+The repo now includes focused Go tests for config validation and HTTP routing.
+
+- Run the test suite: `make test`
+- Run lint + tests + formatting checks: `make lint`, `make test`, `make format-check`

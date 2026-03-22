@@ -39,6 +39,12 @@ Typical local flow:
 2. Adjust placeholder auth or telemetry values as needed.
 3. Run `make run`.
 
+## Validation
+
+- `make test` runs the runtime/config test suite.
+- `make lint` runs the Go lint configuration used by CI and pre-commit.
+- `make precommit-run` runs the full repo-local validation stack.
+
 ## Endpoints
 
 - `GET /`

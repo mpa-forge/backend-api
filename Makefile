@@ -3,7 +3,7 @@ SHELL := bash
 GO_VERSION := 1.25.1
 GOLANGCI_LINT_VERSION := v1.64.8
 PLATFORM_INFRA_DIR := ../platform-infra
-.PHONY: help bootstrap doctor install-tools check-tools print-toolchain install-dev-tools precommit-install precommit-run lint format format-check repo-lint repo-format repo-format-check run support-up support-down support-logs support-ps
+.PHONY: help bootstrap doctor install-tools check-tools print-toolchain install-dev-tools precommit-install precommit-run lint test format format-check repo-lint repo-test repo-format repo-format-check run support-up support-down support-logs support-ps
 
 help:
 	@echo "Targets:"
@@ -16,6 +16,7 @@ help:
 	@echo "  precommit-install Install git pre-commit hooks"
 	@echo "  precommit-run     Run the configured pre-commit checks on all files"
 	@echo "  lint              Run repo lint checks"
+	@echo "  test              Run the Go test suite"
 	@echo "  format            Apply repo formatting"
 	@echo "  format-check      Check repo formatting without writing changes"
 	@echo "  run               Run the API locally using env from .env when present"
@@ -77,6 +78,8 @@ precommit-run:
 
 lint: repo-lint
 
+test: repo-test
+
 format: repo-format
 
 format-check: repo-format-check
@@ -86,6 +89,13 @@ repo-lint:
 		go run github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION) run ./...; \
 	else \
 		echo "No Go files yet; skipping Go lint."; \
+	fi
+
+repo-test:
+	@if find . -name '*.go' -not -path './vendor/*' | grep -q .; then \
+		go test ./...; \
+	else \
+		echo "No Go files yet; skipping Go test."; \
 	fi
 
 repo-format:
