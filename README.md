@@ -68,6 +68,16 @@ The API runtime now validates all of the variables above at startup and exits
 before binding a port when required values are missing or malformed.
 See `docs/api-runtime.md` for endpoint and runtime details.
 
+Protected API procedures expect a Clerk bearer token and currently map token
+claims into the baseline internal profile as follows:
+
+- required identity: `sub`
+- optional profile fields: `email`, `display_name`, `given_name`, `family_name`
+- optional role fields: `role` or `roles`
+
+Recognized internal roles are `user` and `admin`. Requests with a valid token
+but an unsupported role claim receive `403 Forbidden`.
+
 ## Run
 
 For native API work:

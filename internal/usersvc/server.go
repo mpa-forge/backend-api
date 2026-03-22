@@ -3,8 +3,10 @@ package usersvc
 
 import (
 	"context"
+	"fmt"
 
 	"connectrpc.com/connect"
+	"github.com/mpa-forge/backend-api/internal/auth"
 	userv1 "github.com/mpa-forge/platform-contracts/gen/go/blueprint/user/v1"
 	"github.com/mpa-forge/platform-contracts/gen/go/blueprint/user/v1/userv1connect"
 )
@@ -19,20 +21,25 @@ func NewServer() *Server {
 	return &Server{}
 }
 
-// GetCurrentUser returns deterministic placeholder profile data until auth and persistence land.
+// GetCurrentUser returns the authenticated principal extracted from the verified
+// Clerk bearer token.
 func (s *Server) GetCurrentUser(
 	ctx context.Context,
 	req *connect.Request[userv1.GetCurrentUserRequest],
 ) (*connect.Response[userv1.GetCurrentUserResponse], error) {
-	_ = ctx
 	_ = req
+
+	principal, ok := auth.PrincipalFromContext(ctx)
+	if !ok {
+		return nil, connect.NewError(connect.CodeUnauthenticated, fmt.Errorf("authenticated principal missing from request context"))
+	}
 
 	return connect.NewResponse(&userv1.GetCurrentUserResponse{
 		User: &userv1.UserProfile{
-			UserId:      "user_local_placeholder",
-			Email:       "user@example.com",
-			DisplayName: "Local Placeholder User",
-			Role:        "user",
+			UserId:      principal.UserID,
+			Email:       principal.Email,
+			DisplayName: principal.DisplayName,
+			Role:        string(principal.Role),
 		},
 	}), nil
 }
