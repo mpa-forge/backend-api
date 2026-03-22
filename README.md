@@ -95,12 +95,13 @@ After code changes, rerun `make run` to restart the native API process.
 ## Database
 
 The API now carries repo-local Postgres migration and seed tooling using
-`golang-migrate` and embedded SQL files.
+`golang-migrate`, `sqlc`, and repo-local SQL files.
 
 - Apply schema migrations: `make migrate-up`
 - Apply deterministic seed data: `make db-seed`
 - Apply schema + seed baseline: `make db-prepare`
 - Roll back all schema migrations: `make migrate-down`
+- Regenerate typed DB accessors: `make sqlc-generate`
 
 Typical local flow:
 
@@ -127,7 +128,8 @@ See `docs/database-migrations.md` for details.
 
 ## Test
 
-The repo now includes focused Go tests for config validation and HTTP routing.
+The repo now includes focused Go tests for config validation, profile
+provisioning, and HTTP routing.
 
 - Run the test suite: `make test`
 - Run lint + tests + formatting checks: `make lint`, `make test`, `make format-check`

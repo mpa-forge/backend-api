@@ -1,0 +1,12 @@
+version: "2"
+
+sql:
+  - engine: "postgresql"
+    schema: "internal/database/migrations/000001_create_user_profiles.up.sql"
+    queries: "internal/database/queries"
+    gen:
+      go:
+        package: "dbsqlc"
+        out: "internal/database/sqlc"
+        sql_package: "pgx/v5"
+        emit_interface: true

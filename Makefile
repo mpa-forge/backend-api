@@ -2,8 +2,9 @@ SHELL := bash
 
 GO_VERSION := 1.25.1
 GOLANGCI_LINT_VERSION := v1.64.8
+SQLC_VERSION := v1.30.0
 PLATFORM_INFRA_DIR := ../platform-infra
-.PHONY: help bootstrap doctor install-tools check-tools print-toolchain install-dev-tools precommit-install precommit-run lint test format format-check repo-lint repo-test repo-format repo-format-check run support-up support-down support-logs support-ps migrate-up migrate-down db-seed db-prepare
+.PHONY: help bootstrap doctor install-tools check-tools print-toolchain install-dev-tools precommit-install precommit-run lint test format format-check repo-lint repo-test repo-format repo-format-check run support-up support-down support-logs support-ps migrate-up migrate-down db-seed db-prepare sqlc-generate
 
 help:
 	@echo "Targets:"
@@ -28,6 +29,7 @@ help:
 	@echo "  migrate-down      Roll back all embedded Postgres schema migrations"
 	@echo "  db-seed           Apply deterministic baseline seed data"
 	@echo "  db-prepare        Apply schema migrations and deterministic seed data"
+	@echo "  sqlc-generate     Regenerate typed Postgres accessors from SQL files"
 
 bootstrap: install-tools check-tools install-dev-tools
 	@if find . -name '*.go' -not -path './vendor/*' | grep -q .; then \
@@ -172,3 +174,6 @@ db-prepare:
 	fi; \
 	set +a; \
 	go run ./cmd/migrate prepare
+
+sqlc-generate:
+	go run github.com/sqlc-dev/sqlc/cmd/sqlc@$(SQLC_VERSION) generate

@@ -22,7 +22,8 @@ Current flow:
 2. The generated `UserService` Connect handler is created with an auth interceptor.
 3. The auth interceptor extracts and verifies the bearer token.
 4. The verified principal is stored in request context.
-5. The service handler reads the principal from context and returns it.
+5. The provisioning handler upserts the local profile row from that principal.
+6. The read handler loads the local profile from Postgres by Clerk subject.
 
 Relevant code:
 
@@ -30,6 +31,8 @@ Relevant code:
 - `internal/auth/interceptor.go`
 - `internal/auth/verifier.go`
 - `internal/auth/jwks.go`
+- `internal/database/profiles.go`
+- `internal/database/sqlc/`
 - `internal/usersvc/server.go`
 
 ## Verification Rules
@@ -57,9 +60,9 @@ Current baseline claim usage:
   - `role`
   - `roles`
 
-The verified Clerk `sub` is the backend's stable external identity key. When
-the API reads persisted user data, it should use that `sub` directly as
-`user_profiles.clerk_user_id`.
+The verified Clerk `sub` is the backend's stable external identity key. The API
+uses that `sub` directly as `user_profiles.clerk_user_id` both when
+provisioning the row and when reading it later.
 
 ## Role Mapping
 
@@ -83,6 +86,7 @@ Current mapping:
 
 - invalid or missing bearer token -> `connect.CodeUnauthenticated` -> HTTP `401`
 - valid token with unsupported role -> `connect.CodePermissionDenied` -> HTTP `403`
+- valid token with no local row on `GetCurrentUser` -> `connect.CodeNotFound` -> HTTP `404`
 - unexpected verifier failure -> `connect.CodeInternal`
 
 ## Tests
@@ -99,4 +103,6 @@ These tests cover:
 - invalid issuer/audience
 - JWKS-backed signature verification
 - unsupported role handling
-- authenticated route success through the mounted Connect handler
+- authenticated route success through the mounted Connect handlers
+- explicit profile provisioning from the verified principal
+- DB-backed profile reads after provisioning
