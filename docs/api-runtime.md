@@ -79,3 +79,7 @@ rejects the request with `403`.
 
 `GetCurrentUser` now reflects the authenticated principal from the verified
 token. Database-backed user enrichment still lands in later Phase 2 tasks.
+
+Implementation details:
+
+- `docs/auth-implementation.md`
