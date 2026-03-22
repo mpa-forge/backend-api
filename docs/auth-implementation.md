@@ -59,7 +59,7 @@ Current baseline claim usage:
 
 The verified Clerk `sub` is the backend's stable external identity key. When
 the API reads persisted user data, it should use that `sub` directly as
-`user_profiles.external_user_id`.
+`user_profiles.clerk_user_id`.
 
 ## Role Mapping
 

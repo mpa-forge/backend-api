@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS user_profiles (
     id BIGSERIAL PRIMARY KEY,
-    external_user_id TEXT NOT NULL UNIQUE,
+    clerk_user_id TEXT NOT NULL UNIQUE,
     email TEXT NOT NULL,
     display_name TEXT NOT NULL,
     role TEXT NOT NULL CHECK (role IN ('user', 'admin')),

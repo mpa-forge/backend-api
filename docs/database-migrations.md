@@ -14,7 +14,7 @@ The baseline deterministic seed set inserts:
 - one `user` profile row
 - one `admin` profile row
 
-`user_profiles.external_user_id` is the canonical persistence key for the
+`user_profiles.clerk_user_id` is the canonical persistence key for the
 authenticated user and maps directly to the verified Clerk `sub` claim.
 
 The seed set is intentionally generic. It establishes a repeatable database
