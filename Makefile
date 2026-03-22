@@ -3,12 +3,7 @@ SHELL := bash
 GO_VERSION := 1.25.1
 GOLANGCI_LINT_VERSION := v1.64.8
 PLATFORM_INFRA_DIR := ../platform-infra
-APP_ENV ?= local
-LOG_LEVEL ?= debug
-HTTP_PORT ?= 8080
-DATABASE_URL ?= postgres://postgres:postgres@localhost:5432/platform_blueprint?sslmode=disable
-
-.PHONY: help bootstrap doctor install-tools check-tools print-toolchain install-dev-tools precommit-install precommit-run lint format format-check repo-lint repo-format repo-format-check run support-up support-down support-logs support-ps
+.PHONY: help bootstrap doctor install-tools check-tools print-toolchain install-dev-tools precommit-install precommit-run lint test format format-check repo-lint repo-test repo-format repo-format-check run support-up support-down support-logs support-ps
 
 help:
 	@echo "Targets:"
@@ -21,9 +16,10 @@ help:
 	@echo "  precommit-install Install git pre-commit hooks"
 	@echo "  precommit-run     Run the configured pre-commit checks on all files"
 	@echo "  lint              Run repo lint checks"
+	@echo "  test              Run the Go test suite"
 	@echo "  format            Apply repo formatting"
 	@echo "  format-check      Check repo formatting without writing changes"
-	@echo "  run               Run the placeholder API locally on port $(HTTP_PORT)"
+	@echo "  run               Run the API locally using env from .env when present"
 	@echo "  support-up        Start postgres + frontend-web from platform-infra"
 	@echo "  support-down      Stop the shared local compose stack"
 	@echo "  support-logs      Stream postgres + frontend-web logs"
@@ -82,6 +78,8 @@ precommit-run:
 
 lint: repo-lint
 
+test: repo-test
+
 format: repo-format
 
 format-check: repo-format-check
@@ -91,6 +89,13 @@ repo-lint:
 		go run github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION) run ./...; \
 	else \
 		echo "No Go files yet; skipping Go lint."; \
+	fi
+
+repo-test:
+	@if find . -name '*.go' -not -path './vendor/*' | grep -q .; then \
+		go test ./...; \
+	else \
+		echo "No Go files yet; skipping Go test."; \
 	fi
 
 repo-format:
@@ -113,7 +118,12 @@ repo-format-check:
 	fi
 
 run:
-	APP_ENV=$(APP_ENV) LOG_LEVEL=$(LOG_LEVEL) HTTP_PORT=$(HTTP_PORT) DATABASE_URL=$(DATABASE_URL) go run ./cmd/api-placeholder
+	@set -a; \
+	if [[ -f .env ]]; then \
+		source .env; \
+	fi; \
+	set +a; \
+	go run ./cmd/api
 
 support-up:
 	$(MAKE) -C $(PLATFORM_INFRA_DIR) local-api-support-up
@@ -126,4 +136,3 @@ support-logs:
 
 support-ps:
 	$(MAKE) -C $(PLATFORM_INFRA_DIR) local-ps
-

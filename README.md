@@ -3,6 +3,7 @@
 Go API service repository for the platform blueprint.
 
 ## Structure
+
 - `cmd/`: service entrypoints
 - `internal/`: private application code
 - `pkg/`: shareable public packages
@@ -11,23 +12,28 @@ Go API service repository for the platform blueprint.
 - `scripts/`: local utility and developer scripts
 
 ## Toolchain
+
 - GNU Make (or a compatible `make` implementation) and a bash-compatible shell
 - Go `1.25.1`
 - Version pin source: `.tool-versions` and `go.mod`
 
 Windows note:
+
 - use a POSIX-friendly GNU Make such as `ezwinports.make` or MSYS2 `make`
 - ensure Git for Windows `bash.exe` is on `PATH`
 - do not use `GnuWin32` make for this repo
 
 ## Setup
+
 Before running bootstrap:
+
 - Shared workspace requirement: keep `platform-blueprint-specs` checked out as a sibling directory if you want to use `make doctor`.
 - Required: GNU Make (or a compatible `make` implementation) and a bash-compatible shell
 - Recommended: `mise` or `asdf` for automatic tool installation from `.tool-versions`
 - Fallback: manually install the pinned tool versions listed above
 
 Run the setup commands from the repository root:
+
 - Workstation checks: `make doctor`
 - Bootstrap: `make bootstrap`
 
@@ -35,13 +41,16 @@ Bootstrap validates the pinned Go toolchain and runs `go mod download`.
 If `mise` or `asdf` is available, the script will use it to install the pinned toolchain automatically.
 
 ## Lint and Format
+
 - Install git hooks: `make precommit-install`
 - Run all pre-commit checks manually: `make precommit-run`
 - Run repo lint checks: `make lint`
+- Run the Go test suite: `make test`
 - Apply formatting: `make format`
 - Check formatting only: `make format-check`
 
 ## Environment
+
 - Copy `.env.example` to `.env` for local development
 - Required local baseline variables:
   - `APP_ENV`
@@ -55,21 +64,29 @@ If `mise` or `asdf` is available, the script will use it to install the pinned t
   - `OTEL_EXPORTER_OTLP_ENDPOINT`
   - `OTEL_EXPORTER_OTLP_HEADERS`
 
+The API runtime now validates all of the variables above at startup and exits
+before binding a port when required values are missing or malformed.
+See `docs/api-runtime.md` for endpoint and runtime details.
+
 ## Run
+
 For native API work:
 
 - Start support services from this repo: `make support-up`
 - Run the API locally: `make run`
 - Stop support services: `make support-down`
 
-The placeholder API serves on `http://localhost:8080`.
+`make run` sources `.env` when present and starts the API on the configured
+`HTTP_PORT`.
 Support services come from the centralized compose stack in `../platform-infra`.
 After code changes, rerun `make run` to restart the native API process.
 
 ## Container
-- Build placeholder image: `docker build -t backend-api:local .`
-- The image packages a minimal placeholder HTTP server for the Docker baseline
-- Placeholder routes currently serve `/` and `/healthz` only, pending the real API skeleton in Phase 2
+
+- Build a local image: `docker build -t backend-api:local .`
+- The image packages the `cmd/api` runtime skeleton
+- Runtime configuration is still supplied through environment variables at container start
+- The container healthcheck follows the configured `HTTP_PORT`
 
 ## Local Stack
 
@@ -80,6 +97,8 @@ After code changes, rerun `make run` to restart the native API process.
 - Frontend-focused mode is orchestrated from `frontend-web`, where compose provides the containerized API on `http://localhost:8080`
 
 ## Test
-No automated test suite is configured yet.
-Linting, formatting, and test commands will be introduced incrementally in later tasks.
 
+The repo now includes focused Go tests for config validation and HTTP routing.
+
+- Run the test suite: `make test`
+- Run lint + tests + formatting checks: `make lint`, `make test`, `make format-check`
