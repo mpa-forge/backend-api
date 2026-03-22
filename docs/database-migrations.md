@@ -1,7 +1,7 @@
 # Database Migrations
 
 `backend-api` uses `golang-migrate` with repo-local embedded SQL files for the
-Phase 2 schema baseline.
+Phase 2 schema baseline and `sqlc` for typed query generation.
 
 ## Current Scope
 
@@ -33,6 +33,8 @@ Run from the repository root with `DATABASE_URL` set:
   - `make db-seed`
 - apply schema + seed baseline:
   - `make db-prepare`
+- regenerate typed DB accessors:
+  - `make sqlc-generate`
 
 For local development:
 
@@ -45,6 +47,8 @@ For local development:
 
 - `internal/database/migrations/`
 - `internal/database/seeds/`
+- `internal/database/queries/`
+- `internal/database/sqlc/`
 - `cmd/migrate/`
 
 ## Notes

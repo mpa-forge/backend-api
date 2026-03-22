@@ -53,9 +53,15 @@ Typical local flow:
   - liveness response
 - `GET /readyz`
   - readiness response for the in-process runtime skeleton
+- `POST /blueprint.user.v1.UserService/EnsureCurrentUserProfile`
+  - generated Connect handler mounted through `chi`
+  - requires `Authorization: Bearer <Clerk session token>`
+  - provisions or refreshes the local `user_profiles` row for the authenticated
+    Clerk subject
 - `POST /blueprint.user.v1.UserService/GetCurrentUser`
   - generated Connect handler mounted through `chi`
   - requires `Authorization: Bearer <Clerk session token>`
+  - reads the current local profile from Postgres by `clerk_user_id`
 
 ## Authentication
 
@@ -77,8 +83,9 @@ If no recognized role claim is present, the API defaults the caller to `user`.
 If a role claim is present but does not map to `user` or `admin`, the API
 rejects the request with `403`.
 
-`GetCurrentUser` now reflects the authenticated principal from the verified
-token. Database-backed user enrichment still lands in later Phase 2 tasks.
+`EnsureCurrentUserProfile` now performs the explicit local bootstrap step for an
+authenticated user, and `GetCurrentUser` reads the persisted profile by
+`clerk_user_id`.
 
 Implementation details:
 

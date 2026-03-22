@@ -80,6 +80,7 @@ func newRouter(cfg config.Config, logger *slog.Logger, verifier auth.Verifier, u
 			"service":     "backend-api",
 			"environment": cfg.AppEnv,
 			"procedures": []string{
+				userv1connect.UserServiceEnsureCurrentUserProfileProcedure,
 				userv1connect.UserServiceGetCurrentUserProcedure,
 			},
 		})

@@ -10,7 +10,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/jackc/pgx/v5 v5.9.1
-	github.com/mpa-forge/platform-contracts v0.0.0-20260322014205-862182dada51
+	github.com/mpa-forge/platform-contracts v0.0.0-20260322195240-a7b2909c6aa0
 )
 
 require (

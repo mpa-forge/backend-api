@@ -10,6 +10,7 @@ import (
 
 	"github.com/mpa-forge/backend-api/internal/api"
 	"github.com/mpa-forge/backend-api/internal/config"
+	"github.com/mpa-forge/backend-api/internal/database"
 	"github.com/mpa-forge/backend-api/internal/usersvc"
 )
 
@@ -24,7 +25,14 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	if err := api.Run(ctx, cfg, logger, usersvc.NewServer()); err != nil {
+	pool, err := database.OpenPool(ctx, cfg.DatabaseURL)
+	if err != nil {
+		logger.Error("database startup failed", slog.Any("error", err))
+		os.Exit(1)
+	}
+	defer pool.Close()
+
+	if err := api.Run(ctx, cfg, logger, usersvc.NewServer(database.NewProfileStore(pool))); err != nil {
 		logger.Error("api runtime stopped with error", slog.Any("error", err))
 		os.Exit(1)
 	}
