@@ -14,9 +14,12 @@ The baseline deterministic seed set inserts:
 - one `user` profile row
 - one `admin` profile row
 
-This seed set is intentionally generic. It establishes a repeatable database
-baseline for local and CI validation without locking the later `P2-T09`
-decision about how authenticated Clerk `sub` values map to persisted profiles.
+`user_profiles.external_user_id` is the canonical persistence key for the
+authenticated user and maps directly to the verified Clerk `sub` claim.
+
+The seed set is intentionally generic. It establishes a repeatable database
+baseline for local and CI validation without pretending that the placeholder
+seed users are real Clerk identities.
 
 ## Commands
 
