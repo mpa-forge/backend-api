@@ -1,20 +1,25 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  Repository: backend-api
+  Role: Browser-facing Go API service for the platform blueprint.
+  Stack: Go, chi, connect-go, protobuf-first API contracts, sqlc, pgx, PostgreSQL.
+  Shared defaults: GCP is the cloud baseline and local delivery is orchestrated through platform-infra.
+  API baseline: Connect-compatible handlers are mounted through chi and protected API procedures use Clerk bearer-token validation.
+  Persistence baseline: repo-local SQL migrations and sqlc-generated typed accessors back the API runtime.
+  Documentation rule: OpenSpec specs are the canonical source for behavior requirements; docs/ files are compatibility-oriented summaries and pointers.
+  Spec modeling rule: Prefer capability-sized specs such as runtime, auth, database baseline, and runtime-path selection instead of umbrella specs.
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+rules:
+  proposal:
+    - Keep proposals concise and focused on why and impact, not implementation detail.
+    - List capability names in kebab-case and prefer splitting broad documentation changes into smaller capability scopes.
+  design:
+    - Preserve existing backend-api conventions around chi, connect-go, Clerk auth, sqlc, and pgx unless the change explicitly intends to alter them.
+    - Call out compatibility impacts when docs, runtime contracts, or cross-repo references are affected.
+  specs:
+    - Write normative requirements using SHALL or MUST on the first requirement line so they validate cleanly with OpenSpec.
+    - Treat OpenSpec as the canonical behavior contract and avoid duplicating long narrative docs inside specs.
+  tasks:
+    - Keep tasks small, dependency-ordered, and scoped to one repository unless the change explicitly requires cross-repo coordination.
+    - Include archive or sync work when a change is only complete after canonical specs are updated.

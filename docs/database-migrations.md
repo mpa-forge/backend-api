@@ -1,58 +1,30 @@
 # Database Migrations
 
-`backend-api` uses `golang-migrate` with repo-local embedded SQL files for the
-Phase 2 schema baseline and `sqlc` for typed query generation.
+This file is a compatibility entry point. The canonical migration and
+persistence requirements now live in
+`openspec/specs/database-migration-baseline/spec.md`.
 
-## Current Scope
+## OpenSpec Capability
 
-The baseline migration creates:
+- `database-migration-baseline`
 
-- `user_profiles`
+## Quick Reference
 
-The baseline deterministic seed set inserts:
-
-- one `user` profile row
-- one `admin` profile row
-
-`user_profiles.clerk_user_id` is the canonical persistence key for the
-authenticated user and maps directly to the verified Clerk `sub` claim.
-
-The seed set is intentionally generic. It establishes a repeatable database
-baseline for local and CI validation without pretending that the placeholder
-seed users are real Clerk identities.
-
-## Commands
-
-Run from the repository root with `DATABASE_URL` set:
-
-- apply schema migrations:
+- repo-local commands remain:
   - `make migrate-up`
-- roll back all schema migrations:
   - `make migrate-down`
-- apply deterministic seed data:
   - `make db-seed`
-- apply schema + seed baseline:
   - `make db-prepare`
-- regenerate typed DB accessors:
   - `make sqlc-generate`
-
-For local development:
-
-1. start shared support services:
-   - `make support-up`
-2. apply schema + seed baseline:
-   - `make db-prepare`
-
-## File Layout
-
-- `internal/database/migrations/`
-- `internal/database/seeds/`
-- `internal/database/queries/`
-- `internal/database/sqlc/`
-- `cmd/migrate/`
-
-## Notes
-
-- migrations are idempotent at the schema versioning level
-- seeds are deterministic and re-runnable through `ON CONFLICT`
+- migration, seed, query, generated sqlc, and migrate entrypoint assets remain
+  under `internal/database/` and `cmd/migrate/`
+- the baseline schema includes `user_profiles`
+- `user_profiles.clerk_user_id` remains the canonical persistence key for the
+  verified Clerk `sub`
+- the seed set remains deterministic and safe to re-run
 - runtime startup does not auto-apply migrations in this phase
+
+## Update Rule
+
+When database baseline behavior changes, update the OpenSpec capability first
+and keep this file as a lightweight reader-friendly summary.
