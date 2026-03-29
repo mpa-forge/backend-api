@@ -5,6 +5,9 @@ placeholder server.
 
 ## Startup Contract
 
+Runtime-path selection and Cloud Run vs GKE expectations are documented in
+`docs/api-runtime-paths-cloud-run-gke.md`.
+
 Startup is fail-fast. The process exits before binding a port when required
 environment variables are missing or malformed.
 
