@@ -162,6 +162,62 @@ func TestNewRouterRejectsUnauthorizedAndForbiddenConnectRequests(t *testing.T) {
 	}
 }
 
+func TestNewRouterAllowsConfiguredLocalFrontendOriginsForConnectRequests(t *testing.T) {
+	handler := newRouter(
+		config.Config{AppEnv: "local"},
+		slog.New(slog.NewTextHandler(io.Discard, nil)),
+		staticVerifier{},
+		usersvc.NewServer(&fakeProfileStore{}),
+	)
+
+	req := httptest.NewRequest(http.MethodOptions, "/blueprint.user.v1.UserService/EnsureCurrentUserProfile", nil)
+	req.Header.Set("Origin", "http://127.0.0.1:3000")
+	req.Header.Set("Access-Control-Request-Method", http.MethodPost)
+	req.Header.Set(
+		"Access-Control-Request-Headers",
+		"authorization,content-type,connect-protocol-version",
+	)
+
+	resp := httptest.NewRecorder()
+	handler.ServeHTTP(resp, req)
+
+	if resp.Code != http.StatusNoContent {
+		t.Fatalf("status = %d, want %d", resp.Code, http.StatusNoContent)
+	}
+	if got := resp.Header().Get("Access-Control-Allow-Origin"); got != "http://127.0.0.1:3000" {
+		t.Fatalf("Access-Control-Allow-Origin = %q, want %q", got, "http://127.0.0.1:3000")
+	}
+	if got := resp.Header().Get("Access-Control-Allow-Methods"); got != "GET,POST,OPTIONS" {
+		t.Fatalf("Access-Control-Allow-Methods = %q, want %q", got, "GET,POST,OPTIONS")
+	}
+	if got := resp.Header().Get("Access-Control-Allow-Headers"); got != "authorization,content-type,connect-protocol-version" {
+		t.Fatalf("Access-Control-Allow-Headers = %q, want request header echo", got)
+	}
+}
+
+func TestNewRouterDoesNotAllowUnknownOriginsForPreflight(t *testing.T) {
+	handler := newRouter(
+		config.Config{AppEnv: "local"},
+		slog.New(slog.NewTextHandler(io.Discard, nil)),
+		staticVerifier{},
+		usersvc.NewServer(&fakeProfileStore{}),
+	)
+
+	req := httptest.NewRequest(http.MethodOptions, "/blueprint.user.v1.UserService/EnsureCurrentUserProfile", nil)
+	req.Header.Set("Origin", "http://malicious.example")
+	req.Header.Set("Access-Control-Request-Method", http.MethodPost)
+
+	resp := httptest.NewRecorder()
+	handler.ServeHTTP(resp, req)
+
+	if resp.Code != http.StatusForbidden {
+		t.Fatalf("status = %d, want %d", resp.Code, http.StatusForbidden)
+	}
+	if got := resp.Header().Get("Access-Control-Allow-Origin"); got != "" {
+		t.Fatalf("Access-Control-Allow-Origin = %q, want empty", got)
+	}
+}
+
 type staticVerifier struct {
 	principal auth.Principal
 	err       error

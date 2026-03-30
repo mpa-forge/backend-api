@@ -8,6 +8,11 @@ import (
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
 )
 
+var localFrontendOrigins = map[string]struct{}{
+	"http://localhost:3000": {},
+	"http://127.0.0.1:3000": {},
+}
+
 func requestLogger(logger *slog.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -27,4 +32,58 @@ func requestLogger(logger *slog.Logger) func(http.Handler) http.Handler {
 			)
 		})
 	}
+}
+
+func browserCORS(appEnv string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			origin := r.Header.Get("Origin")
+			if origin == "" {
+				next.ServeHTTP(w, r)
+				return
+			}
+
+			if !isAllowedBrowserOrigin(appEnv, origin) {
+				if r.Method == http.MethodOptions && r.Header.Get("Access-Control-Request-Method") != "" {
+					http.Error(w, "cors origin forbidden", http.StatusForbidden)
+					return
+				}
+
+				next.ServeHTTP(w, r)
+				return
+			}
+
+			headers := w.Header()
+			headers.Set("Access-Control-Allow-Origin", origin)
+			headers.Set("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
+			headers.Set("Vary", "Origin")
+			headers.Add("Vary", "Access-Control-Request-Method")
+			headers.Add("Vary", "Access-Control-Request-Headers")
+
+			if requestedHeaders := r.Header.Get("Access-Control-Request-Headers"); requestedHeaders != "" {
+				headers.Set("Access-Control-Allow-Headers", requestedHeaders)
+			} else {
+				headers.Set(
+					"Access-Control-Allow-Headers",
+					"Authorization,Content-Type,Connect-Protocol-Version,Connect-Timeout-Ms,Grpc-Timeout,X-Grpc-Web,X-User-Agent",
+				)
+			}
+
+			if r.Method == http.MethodOptions && r.Header.Get("Access-Control-Request-Method") != "" {
+				w.WriteHeader(http.StatusNoContent)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+func isAllowedBrowserOrigin(appEnv, origin string) bool {
+	if appEnv != "local" {
+		return false
+	}
+
+	_, ok := localFrontendOrigins[origin]
+	return ok
 }

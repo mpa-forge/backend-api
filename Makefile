@@ -4,6 +4,7 @@ GO_VERSION := 1.25.1
 GOLANGCI_LINT_VERSION := v1.64.8
 SQLC_VERSION := v1.30.0
 PLATFORM_INFRA_DIR := ../platform-infra
+BUILD ?=
 .PHONY: help bootstrap doctor install-tools check-tools print-toolchain install-dev-tools precommit-install precommit-run lint test format format-check repo-lint repo-test repo-format repo-format-check run support-up support-down support-logs support-ps migrate-up migrate-down db-seed db-prepare sqlc-generate
 
 help:
@@ -21,7 +22,7 @@ help:
 	@echo "  format            Apply repo formatting"
 	@echo "  format-check      Check repo formatting without writing changes"
 	@echo "  run               Run the API locally using env from .env when present"
-	@echo "  support-up        Start postgres + frontend-web from platform-infra"
+	@echo "  support-up        Start postgres + frontend-web from platform-infra (optional: BUILD=1)"
 	@echo "  support-down      Stop the shared local compose stack"
 	@echo "  support-logs      Stream postgres + frontend-web logs"
 	@echo "  support-ps        Show shared local compose stack status"
@@ -132,7 +133,7 @@ run:
 	go run ./cmd/api
 
 support-up:
-	$(MAKE) -C $(PLATFORM_INFRA_DIR) local-api-support-up
+	$(MAKE) -C $(PLATFORM_INFRA_DIR) BUILD=$(BUILD) local-api-support-up
 
 support-down:
 	$(MAKE) -C $(PLATFORM_INFRA_DIR) local-down

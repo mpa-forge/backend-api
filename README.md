@@ -84,6 +84,7 @@ but an unsupported role claim receive `403 Forbidden`.
 For native API work:
 
 - Start support services from this repo: `make support-up`
+- Force a support-stack image rebuild before starting: `make support-up BUILD=1`
 - Run the API locally: `make run`
 - Stop support services: `make support-down`
 
@@ -106,6 +107,7 @@ The API now carries repo-local Postgres migration and seed tooling using
 Typical local flow:
 
 1. start support services: `make support-up`
+   or force a rebuild first with `make support-up BUILD=1`
 2. apply schema + seed baseline: `make db-prepare`
 3. run the API: `make run`
 
@@ -122,6 +124,7 @@ See `docs/database-migrations.md` for details.
 
 - API-focused mode:
   - run `make support-up`
+  - run `make support-up BUILD=1` when the containerized frontend image must be rebuilt first
   - run `make run`
   - compose provides `frontend-web` on `http://localhost:3000` and Postgres on `localhost:5432`
 - Frontend-focused mode is orchestrated from `frontend-web`, where compose provides the containerized API on `http://localhost:8080`
