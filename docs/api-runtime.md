@@ -17,6 +17,9 @@ live in `openspec/specs/api-runtime/spec.md`.
 - protected Connect procedures remain:
   - `POST /blueprint.user.v1.UserService/EnsureCurrentUserProfile`
   - `POST /blueprint.user.v1.UserService/GetCurrentUser`
+- in `local`, the runtime now allows browser CORS requests from
+  `http://localhost:3000` and `http://127.0.0.1:3000` so the frontend SPA can
+  call the protected Connect procedures directly
 
 ## Update Rule
 

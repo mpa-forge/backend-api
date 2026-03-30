@@ -73,6 +73,7 @@ func newRouter(cfg config.Config, logger *slog.Logger, verifier auth.Verifier, u
 	router.Use(chimiddleware.RequestID)
 	router.Use(chimiddleware.RealIP)
 	router.Use(chimiddleware.Recoverer)
+	router.Use(browserCORS(cfg.AppEnv))
 	router.Use(requestLogger(logger))
 
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
