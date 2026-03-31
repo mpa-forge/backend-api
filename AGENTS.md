@@ -10,7 +10,8 @@ Before making changes:
 
 1. Read `README.md`.
 2. Read `Makefile` if present.
-3. Read `../platform-blueprint-specs/common/AGENTS.md`.
+3. Run `make sync-agent-skills` before starting major changes or when shared skill guidance may have changed.
+4. Read `../platform-blueprint-specs/common/AGENTS.md`.
 
 ## Repo Role
 
@@ -46,16 +47,33 @@ Before making changes:
 
 ## Shared Skills
 
-These skills live in `../platform-blueprint-specs/.codex/skills/` and are not
-auto-discovered from this repo. Load them explicitly when the task matches.
+Run `make sync-agent-skills` before major changes so the local common skill
+copies stay current.
 
-- `automated-ai-worker` at `../platform-blueprint-specs/.codex/skills/automated-ai-worker/SKILL.md` when the repo is being changed by an automated AI worker or when following the same autonomous workflow manually.
-- `platform-env-contracts` at `../platform-blueprint-specs/.codex/skills/platform-env-contracts/SKILL.md` when creating or updating `.env.example`, documenting runtime variables, or adding/changing startup config validation.
-- `platform-code-documentation` at `../platform-blueprint-specs/.codex/skills/platform-code-documentation/SKILL.md` when updating docs, comments, OpenSpec material, or deciding the right documentation layer for behavior changes.
-- `platform-validation-workflow` at `../platform-blueprint-specs/.codex/skills/platform-validation-workflow/SKILL.md` when deciding which repo-local validation commands to run or whether pre-commit should run.
-- `platform-git-release-workflow` at `../platform-blueprint-specs/.codex/skills/platform-git-release-workflow/SKILL.md` when branch, PR, merge-strategy, tag, release, or clean-worktree decisions are involved.
-- `platform-windows-tooling` at `../platform-blueprint-specs/.codex/skills/platform-windows-tooling/SKILL.md` when the task involves Windows workstation setup, PATH/tool resolution, bootstrap issues, or `make`/`bash`/`python` troubleshooting.
-- `platform-blueprint-repo-workflow` at `C:/Users/Miquel/.codex/skills/platform-blueprint-repo-workflow/SKILL.md` when work is driven by `platform-blueprint-specs` tasks and spans this repo plus sibling implementation repos.
+- `automated-ai-worker` at `.codex/skills/automated-ai-worker/SKILL.md` when
+  the repo is being changed by an automated AI worker or when following the
+  same autonomous workflow manually.
+- `platform-env-contracts` at `.codex/skills/platform-env-contracts/SKILL.md`
+  when creating or updating `.env.example`, documenting runtime variables, or
+  adding/changing startup config validation.
+- `platform-code-documentation` at
+  `.codex/skills/platform-code-documentation/SKILL.md` when updating docs,
+  comments, OpenSpec material, or deciding the right documentation layer for
+  behavior changes.
+- `platform-validation-workflow` at
+  `.codex/skills/platform-validation-workflow/SKILL.md` when deciding which
+  repo-local validation commands to run or whether pre-commit should run.
+- `platform-git-release-workflow` at
+  `.codex/skills/platform-git-release-workflow/SKILL.md` when branch, PR,
+  merge-strategy, tag, release, or clean-worktree decisions are involved.
+- `platform-windows-tooling` at
+  `.codex/skills/platform-windows-tooling/SKILL.md` when the task involves
+  Windows workstation setup, PATH/tool resolution, bootstrap issues, or
+  `make`/`bash`/`python` troubleshooting.
+- `platform-blueprint-repo-workflow` at
+  `.codex/skills/platform-blueprint-repo-workflow/SKILL.md` when work is driven
+  by `platform-blueprint-specs` tasks and spans this repo plus sibling
+  implementation repos.
 
 ## Typical Validation
 
