@@ -45,36 +45,6 @@ Before making changes:
   touches released contract versions, tag semantics, or how `backend-api`
   should consume versioned `platform-contracts` releases.
 
-## Shared Skills
-
-Run `make sync-agent-skills` before major changes so the local common skill
-copies stay current.
-
-- `automated-ai-worker` at `.codex/skills/automated-ai-worker/SKILL.md` when
-  the repo is being changed by an automated AI worker or when following the
-  same autonomous workflow manually.
-- `platform-env-contracts` at `.codex/skills/platform-env-contracts/SKILL.md`
-  when creating or updating `.env.example`, documenting runtime variables, or
-  adding/changing startup config validation.
-- `platform-code-documentation` at
-  `.codex/skills/platform-code-documentation/SKILL.md` when updating docs,
-  comments, OpenSpec material, or deciding the right documentation layer for
-  behavior changes.
-- `platform-validation-workflow` at
-  `.codex/skills/platform-validation-workflow/SKILL.md` when deciding which
-  repo-local validation commands to run or whether pre-commit should run.
-- `platform-git-release-workflow` at
-  `.codex/skills/platform-git-release-workflow/SKILL.md` when branch, PR,
-  merge-strategy, tag, release, or clean-worktree decisions are involved.
-- `platform-windows-tooling` at
-  `.codex/skills/platform-windows-tooling/SKILL.md` when the task involves
-  Windows workstation setup, PATH/tool resolution, bootstrap issues, or
-  `make`/`bash`/`python` troubleshooting.
-- `platform-blueprint-repo-workflow` at
-  `.codex/skills/platform-blueprint-repo-workflow/SKILL.md` when work is driven
-  by `platform-blueprint-specs` tasks and spans this repo plus sibling
-  implementation repos.
-
 ## Typical Validation
 
 - `make lint`
