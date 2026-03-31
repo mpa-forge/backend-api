@@ -35,6 +35,14 @@ Before making changes:
 - `../platform-blueprint-specs/implementation/phase-tasks/phase-2-contracts-service-skeletons-and-data-baseline-tasks.md` when the task needs Phase 2 task alignment, ownership, dependencies, or evidence context.
 - `../platform-blueprint-specs/common/standards/environment-variable-strategy.md` when the task touches `.env.example`, environment-variable naming, startup validation, secret placeholders, or config contract design.
 - `../platform-blueprint-specs/ops/observability-telemetry-budget-profile.md` when the task affects OpenTelemetry wiring, `OBS_TELEMETRY_PROFILE`, Grafana export behavior, or Cloud Run vs GKE observability-path behavior.
+- `../platform-contracts/docs/go-server-usage.md` when the task touches
+  generated Go contract consumption, Connect handler wiring, or server-side
+  contract package usage.
+- `../platform-contracts/docs/consumer-auth-usage.md` when the task needs the
+  consumer-facing protected API auth contract shared with frontend callers.
+- `../platform-contracts/docs/contract-release-workflow.md` when the task
+  touches released contract versions, tag semantics, or how `backend-api`
+  should consume versioned `platform-contracts` releases.
 
 ## Shared Skills
 
