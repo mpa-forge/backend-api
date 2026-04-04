@@ -12,11 +12,13 @@ validation, local run behavior, and the mounted public and Connect endpoints.
 The `backend-api` runtime SHALL validate its required startup configuration
 before binding an HTTP port. Required variables MUST include `APP_ENV`,
 `LOG_LEVEL`, `HTTP_PORT`, `DATABASE_URL`, `AUTH_ISSUER_URL`,
-`AUTH_AUDIENCE`, `OTEL_MODE`, `OTEL_EXPORTER_OTLP_ENDPOINT`, and
-`OTEL_EXPORTER_OTLP_HEADERS`. `OTEL_MODE` MUST accept only `disabled`,
-`direct_otlp`, or `collector_gateway`. When telemetry is enabled through
-`direct_otlp` or `collector_gateway`, the OTLP endpoint and header values MUST
-be present and valid.
+`AUTH_AUDIENCE`, `OTEL_MODE`, `OBS_TELEMETRY_PROFILE`,
+`OTEL_EXPORTER_OTLP_ENDPOINT`, and `OTEL_EXPORTER_OTLP_HEADERS`.
+`OTEL_MODE` MUST accept only `disabled`, `direct_otlp`, or
+`collector_gateway`. `OBS_TELEMETRY_PROFILE` MUST accept only `balanced`,
+`cost`, or `debug`, and it MUST default to `balanced` when unset.
+When telemetry is enabled through `direct_otlp` or `collector_gateway`,
+the OTLP endpoint and header values MUST be present and valid.
 
 #### Scenario: Startup fails on missing required configuration
 

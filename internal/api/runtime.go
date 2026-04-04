@@ -40,6 +40,7 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, userServic
 			slog.String("address", server.Addr),
 			slog.String("environment", cfg.AppEnv),
 			slog.String("telemetry_mode", string(cfg.Telemetry.Mode)),
+			slog.String("telemetry_profile", cfg.Telemetry.Profile),
 		)
 		serverErrors <- server.ListenAndServe()
 	}()

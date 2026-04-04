@@ -13,6 +13,7 @@ func TestLoadFromEnvSuccessWithDisabledTelemetry(t *testing.T) {
 	t.Setenv("AUTH_ISSUER_URL", "https://issuer.example.com")
 	t.Setenv("AUTH_AUDIENCE", "https://api.example.com")
 	t.Setenv("OTEL_MODE", "disabled")
+	t.Setenv("OBS_TELEMETRY_PROFILE", "")
 	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "")
 	t.Setenv("OTEL_EXPORTER_OTLP_HEADERS", "")
 
@@ -27,6 +28,9 @@ func TestLoadFromEnvSuccessWithDisabledTelemetry(t *testing.T) {
 	if cfg.Telemetry.Mode != TelemetryModeDisabled {
 		t.Fatalf("Telemetry.Mode = %q, want %q", cfg.Telemetry.Mode, TelemetryModeDisabled)
 	}
+	if cfg.Telemetry.Profile != "balanced" {
+		t.Fatalf("Telemetry.Profile = %q, want %q", cfg.Telemetry.Profile, "balanced")
+	}
 }
 
 func TestLoadFromEnvReportsMissingAndInvalidValues(t *testing.T) {
@@ -37,6 +41,7 @@ func TestLoadFromEnvReportsMissingAndInvalidValues(t *testing.T) {
 	t.Setenv("AUTH_ISSUER_URL", "https://issuer.example.com")
 	t.Setenv("AUTH_AUDIENCE", "")
 	t.Setenv("OTEL_MODE", "direct_otlp")
+	t.Setenv("OBS_TELEMETRY_PROFILE", "verbose")
 	t.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "")
 	t.Setenv("OTEL_EXPORTER_OTLP_HEADERS", "")
 
@@ -51,6 +56,7 @@ func TestLoadFromEnvReportsMissingAndInvalidValues(t *testing.T) {
 		"HTTP_PORT must be an integer",
 		"DATABASE_URL must be an absolute URL",
 		"AUTH_AUDIENCE cannot be empty",
+		"OBS_TELEMETRY_PROFILE must be one of balanced, cost, or debug",
 		"OTEL_EXPORTER_OTLP_ENDPOINT cannot be empty when OTEL_MODE is enabled",
 		"OTEL_EXPORTER_OTLP_HEADERS cannot be empty when OTEL_MODE is enabled",
 	} {

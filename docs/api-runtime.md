@@ -12,6 +12,10 @@ live in `openspec/specs/api-runtime/spec.md`.
 - startup is fail-fast and validates required environment variables before the
   API binds a port
 - `OTEL_MODE` accepts `disabled`, `direct_otlp`, or `collector_gateway`
+- `OBS_TELEMETRY_PROFILE` accepts `balanced`, `cost`, or `debug` and defaults
+  to `balanced`
+- startup now initializes the shared backend observability runtime from
+  `github.com/mpa-forge/platform-observability/backendobs`
 - `make run` sources `.env` when present and starts `./cmd/api`
 - public endpoints remain `GET /`, `GET /healthz`, and `GET /readyz`
 - protected Connect procedures remain:

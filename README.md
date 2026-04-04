@@ -61,6 +61,7 @@ If `mise` or `asdf` is available, the script will use it to install the pinned t
   - `AUTH_ISSUER_URL`
   - `AUTH_AUDIENCE`
   - `OTEL_MODE`
+  - `OBS_TELEMETRY_PROFILE`
   - `OTEL_EXPORTER_OTLP_ENDPOINT`
   - `OTEL_EXPORTER_OTLP_HEADERS`
 
@@ -68,6 +69,12 @@ The API runtime now validates all of the variables above at startup and exits
 before binding a port when required values are missing or malformed.
 See `docs/api-runtime.md` for endpoint and runtime details and
 `docs/auth-implementation.md` for the auth enforcement internals.
+The shared observability startup contract now uses:
+
+- `OTEL_MODE=disabled|direct_otlp|collector_gateway`
+- `OBS_TELEMETRY_PROFILE=balanced|cost|debug`
+
+`OBS_TELEMETRY_PROFILE` defaults to `balanced` when unset.
 
 Protected API procedures expect a Clerk bearer token and currently map token
 claims into the baseline internal profile as follows:

@@ -39,6 +39,7 @@ type Config struct {
 // exporter wiring is deferred to a later task.
 type TelemetryConfig struct {
 	Mode         TelemetryMode
+	Profile      string
 	OTLPEndpoint *url.URL
 	OTLPHeaders  string
 }
@@ -56,6 +57,7 @@ func LoadFromEnv() (Config, error) {
 	cfg.AuthIssuerURL = parseAbsoluteURL("AUTH_ISSUER_URL", requireNonEmptyEnv("AUTH_ISSUER_URL", &problems), &problems)
 	cfg.AuthAudience = parseAudience("AUTH_AUDIENCE", requireNonEmptyEnv("AUTH_AUDIENCE", &problems), &problems)
 	cfg.Telemetry.Mode = parseTelemetryMode(requireNonEmptyEnv("OTEL_MODE", &problems), &problems)
+	cfg.Telemetry.Profile = parseTelemetryProfile(os.Getenv("OBS_TELEMETRY_PROFILE"), &problems)
 
 	endpointValue, endpointExists := lookupEnv("OTEL_EXPORTER_OTLP_ENDPOINT", &problems)
 	headersValue, headersExists := lookupEnv("OTEL_EXPORTER_OTLP_HEADERS", &problems)
@@ -190,6 +192,20 @@ func parseTelemetryMode(value string, problems *[]string) TelemetryMode {
 	default:
 		*problems = append(*problems, fmt.Sprintf("OTEL_MODE must be one of disabled, direct_otlp, or collector_gateway, got %q", value))
 		return TelemetryModeDisabled
+	}
+}
+
+func parseTelemetryProfile(value string, problems *[]string) string {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "", "balanced":
+		return "balanced"
+	case "cost":
+		return "cost"
+	case "debug":
+		return "debug"
+	default:
+		*problems = append(*problems, fmt.Sprintf("OBS_TELEMETRY_PROFILE must be one of balanced, cost, or debug, got %q", value))
+		return ""
 	}
 }
 
