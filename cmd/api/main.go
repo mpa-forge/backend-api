@@ -74,13 +74,14 @@ func newObservabilityRuntime(ctx context.Context, cfg config.Config) (*backendob
 	}
 
 	return backendobs.Init(ctx, backendobs.Config{
-		ServiceName:    "backend-api",
-		ServiceVersion: buildVersion(),
-		Environment:    cfg.AppEnv,
-		Mode:           backendobs.Mode(cfg.Telemetry.Mode),
-		Profile:        backendobs.Profile(cfg.Telemetry.Profile),
-		OTLPEndpoint:   otlpEndpoint,
-		OTLPHeaders:    cfg.Telemetry.OTLPHeaders,
+		ServiceName:            "backend-api",
+		ServiceVersion:         buildVersion(),
+		Environment:            cfg.AppEnv,
+		Mode:                   backendobs.Mode(cfg.Telemetry.Mode),
+		Profile:                backendobs.Profile(cfg.Telemetry.Profile),
+		OTLPEndpoint:           otlpEndpoint,
+		GrafanaCloudInstanceID: cfg.Telemetry.InstanceID,
+		GrafanaOTLPIngestToken: cfg.Telemetry.IngestToken,
 	})
 }
 

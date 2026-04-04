@@ -16,6 +16,12 @@ live in `openspec/specs/api-runtime/spec.md`.
   to `balanced`
 - startup now initializes the shared backend observability runtime from
   `github.com/mpa-forge/platform-observability/backendobs`
+- telemetry-enabled runtimes require:
+  - `OTEL_EXPORTER_OTLP_ENDPOINT`
+  - `GRAFANA_CLOUD_INSTANCE_ID`
+  - `GRAFANA_OTLP_INGEST_TOKEN`
+- the runtime composes the OTLP Basic auth header from the Grafana instance ID
+  and ingest token instead of requiring `OTEL_EXPORTER_OTLP_HEADERS`
 - `make run` sources `.env` when present and starts `./cmd/api`
 - public endpoints remain `GET /`, `GET /healthz`, and `GET /readyz`
 - protected Connect procedures remain:
