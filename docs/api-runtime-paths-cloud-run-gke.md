@@ -16,6 +16,8 @@ requirements now live in `openspec/specs/api-runtime-path-selection/spec.md`.
 - `platform-infra` keeps both runtime-path modules available with enable flags
 - Cloud Run deployments use direct OTLP telemetry
 - GKE deployments use the collector or alloy gateway telemetry path
+- both paths use the shared backend observability package and
+  `OBS_TELEMETRY_PROFILE`
 - runtime-path switches remain runbook-driven and reversible
 
 ## Update Rule
