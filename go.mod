@@ -11,7 +11,7 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/jackc/pgx/v5 v5.9.1
 	github.com/mpa-forge/platform-contracts v0.0.0-20260322195240-a7b2909c6aa0
-	github.com/mpa-forge/platform-observability v0.0.0-20260404101456-3487966809e6
+	github.com/mpa-forge/platform-observability v0.0.0-20260404184128-b50fd2c8633c
 )
 
 require (

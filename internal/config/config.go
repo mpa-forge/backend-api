@@ -35,13 +35,14 @@ type Config struct {
 	Telemetry TelemetryConfig
 }
 
-// TelemetryConfig stores the observability-related environment contract even though
-// exporter wiring is deferred to a later task.
+// TelemetryConfig stores the observability-related environment contract used by
+// the shared backend observability runtime.
 type TelemetryConfig struct {
 	Mode         TelemetryMode
 	Profile      string
 	OTLPEndpoint *url.URL
-	OTLPHeaders  string
+	InstanceID   string
+	IngestToken  string
 }
 
 // LoadFromEnv parses the required environment variables and returns all validation
@@ -60,23 +61,27 @@ func LoadFromEnv() (Config, error) {
 	cfg.Telemetry.Profile = parseTelemetryProfile(os.Getenv("OBS_TELEMETRY_PROFILE"), &problems)
 
 	endpointValue, endpointExists := lookupEnv("OTEL_EXPORTER_OTLP_ENDPOINT", &problems)
-	headersValue, headersExists := lookupEnv("OTEL_EXPORTER_OTLP_HEADERS", &problems)
+	instanceIDValue, instanceIDExists := lookupEnv("GRAFANA_CLOUD_INSTANCE_ID", &problems)
+	ingestTokenValue, ingestTokenExists := lookupEnv("GRAFANA_OTLP_INGEST_TOKEN", &problems)
 	if endpointExists && endpointValue != "" {
 		cfg.Telemetry.OTLPEndpoint = parseAbsoluteURL("OTEL_EXPORTER_OTLP_ENDPOINT", endpointValue, &problems)
 	}
-	if headersExists {
-		cfg.Telemetry.OTLPHeaders = headersValue
-		if headersValue != "" {
-			validateOTLPHeaders(headersValue, &problems)
-		}
+	if instanceIDExists {
+		cfg.Telemetry.InstanceID = instanceIDValue
+	}
+	if ingestTokenExists {
+		cfg.Telemetry.IngestToken = ingestTokenValue
 	}
 
 	if cfg.Telemetry.Mode != TelemetryModeDisabled {
 		if endpointValue == "" {
 			problems = append(problems, "OTEL_EXPORTER_OTLP_ENDPOINT cannot be empty when OTEL_MODE is enabled")
 		}
-		if headersValue == "" {
-			problems = append(problems, "OTEL_EXPORTER_OTLP_HEADERS cannot be empty when OTEL_MODE is enabled")
+		if instanceIDValue == "" {
+			problems = append(problems, "GRAFANA_CLOUD_INSTANCE_ID cannot be empty when OTEL_MODE is enabled")
+		}
+		if ingestTokenValue == "" {
+			problems = append(problems, "GRAFANA_OTLP_INGEST_TOKEN cannot be empty when OTEL_MODE is enabled")
 		}
 	}
 
@@ -206,22 +211,5 @@ func parseTelemetryProfile(value string, problems *[]string) string {
 	default:
 		*problems = append(*problems, fmt.Sprintf("OBS_TELEMETRY_PROFILE must be one of balanced, cost, or debug, got %q", value))
 		return ""
-	}
-}
-
-func validateOTLPHeaders(value string, problems *[]string) {
-	pairs := strings.Split(value, ",")
-	for _, pair := range pairs {
-		header := strings.TrimSpace(pair)
-		if header == "" {
-			*problems = append(*problems, "OTEL_EXPORTER_OTLP_HEADERS cannot contain empty header entries")
-			return
-		}
-
-		name, rawValue, found := strings.Cut(header, "=")
-		if !found || strings.TrimSpace(name) == "" || strings.TrimSpace(rawValue) == "" {
-			*problems = append(*problems, fmt.Sprintf("OTEL_EXPORTER_OTLP_HEADERS entries must use key=value format, got %q", header))
-			return
-		}
 	}
 }

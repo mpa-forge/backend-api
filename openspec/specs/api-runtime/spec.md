@@ -13,12 +13,13 @@ The `backend-api` runtime SHALL validate its required startup configuration
 before binding an HTTP port. Required variables MUST include `APP_ENV`,
 `LOG_LEVEL`, `HTTP_PORT`, `DATABASE_URL`, `AUTH_ISSUER_URL`,
 `AUTH_AUDIENCE`, `OTEL_MODE`, `OBS_TELEMETRY_PROFILE`,
-`OTEL_EXPORTER_OTLP_ENDPOINT`, and `OTEL_EXPORTER_OTLP_HEADERS`.
+`OTEL_EXPORTER_OTLP_ENDPOINT`, `GRAFANA_CLOUD_INSTANCE_ID`, and
+`GRAFANA_OTLP_INGEST_TOKEN`.
 `OTEL_MODE` MUST accept only `disabled`, `direct_otlp`, or
 `collector_gateway`. `OBS_TELEMETRY_PROFILE` MUST accept only `balanced`,
 `cost`, or `debug`, and it MUST default to `balanced` when unset.
 When telemetry is enabled through `direct_otlp` or `collector_gateway`,
-the OTLP endpoint and header values MUST be present and valid.
+the OTLP endpoint and Grafana OTLP token ingredients MUST be present and valid.
 
 #### Scenario: Startup fails on missing required configuration
 
@@ -29,8 +30,9 @@ the OTLP endpoint and header values MUST be present and valid.
 #### Scenario: Telemetry configuration is required when enabled
 
 - **WHEN** `OTEL_MODE` is `direct_otlp` or `collector_gateway`
-- **THEN** the runtime rejects startup if `OTEL_EXPORTER_OTLP_ENDPOINT` or
-  `OTEL_EXPORTER_OTLP_HEADERS` is empty or malformed
+- **THEN** the runtime rejects startup if `OTEL_EXPORTER_OTLP_ENDPOINT`,
+  `GRAFANA_CLOUD_INSTANCE_ID`, or `GRAFANA_OTLP_INGEST_TOKEN` is empty or
+  malformed
 
 ### Requirement: Local run entrypoint
 

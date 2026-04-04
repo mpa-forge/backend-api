@@ -63,7 +63,8 @@ If `mise` or `asdf` is available, the script will use it to install the pinned t
   - `OTEL_MODE`
   - `OBS_TELEMETRY_PROFILE`
   - `OTEL_EXPORTER_OTLP_ENDPOINT`
-  - `OTEL_EXPORTER_OTLP_HEADERS`
+  - `GRAFANA_CLOUD_INSTANCE_ID`
+  - `GRAFANA_OTLP_INGEST_TOKEN`
 
 The API runtime now validates all of the variables above at startup and exits
 before binding a port when required values are missing or malformed.
@@ -73,8 +74,14 @@ The shared observability startup contract now uses:
 
 - `OTEL_MODE=disabled|direct_otlp|collector_gateway`
 - `OBS_TELEMETRY_PROFILE=balanced|cost|debug`
+- `OTEL_EXPORTER_OTLP_ENDPOINT=<absolute OTLP URL>`
+- `GRAFANA_CLOUD_INSTANCE_ID=<grafana instance id>`
+- `GRAFANA_OTLP_INGEST_TOKEN=<gsm-backed ingest token>`
 
 `OBS_TELEMETRY_PROFILE` defaults to `balanced` when unset.
+The API composes the final OTLP Basic auth header at runtime from the Grafana
+instance ID and ingest token instead of requiring a prebuilt
+`OTEL_EXPORTER_OTLP_HEADERS` value.
 
 Protected API procedures expect a Clerk bearer token and currently map token
 claims into the baseline internal profile as follows:
