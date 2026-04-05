@@ -18,15 +18,16 @@ import (
 	"github.com/mpa-forge/backend-api/internal/auth"
 	"github.com/mpa-forge/backend-api/internal/config"
 	"github.com/mpa-forge/platform-contracts/gen/go/blueprint/user/v1/userv1connect"
+	"github.com/mpa-forge/platform-observability/backendobs"
 )
 
 const shutdownTimeout = 10 * time.Second
 
 // Run starts the API server and blocks until the listener stops or the context is cancelled.
-func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, userService userv1connect.UserServiceHandler) error {
+func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, obsRuntime *backendobs.Runtime, userService userv1connect.UserServiceHandler) error {
 	server := &http.Server{
 		Addr:              net.JoinHostPort("", strconv.Itoa(cfg.HTTPPort)),
-		Handler:           newRouter(cfg, logger, auth.NewClerkVerifier(cfg.AuthIssuerURL, cfg.AuthAudience), userService),
+		Handler:           newRouter(cfg, logger, obsRuntime, auth.NewClerkVerifier(cfg.AuthIssuerURL, cfg.AuthAudience), userService),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,
 		WriteTimeout:      15 * time.Second,
@@ -69,13 +70,25 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, userServic
 	return nil
 }
 
-func newRouter(cfg config.Config, logger *slog.Logger, verifier auth.Verifier, userService userv1connect.UserServiceHandler) http.Handler {
+func newRouter(
+	cfg config.Config,
+	logger *slog.Logger,
+	obsRuntime *backendobs.Runtime,
+	verifier auth.Verifier,
+	userService userv1connect.UserServiceHandler,
+) http.Handler {
 	router := chi.NewRouter()
 	router.Use(chimiddleware.RequestID)
 	router.Use(chimiddleware.RealIP)
 	router.Use(chimiddleware.Recoverer)
 	router.Use(browserCORS(cfg.AppEnv))
-	router.Use(requestLogger(logger))
+	router.Use(obsRuntime.Middleware(backendobs.HTTPMiddlewareConfig{
+		Operation: "http.server",
+		RouteLabel: func(r *http.Request) string {
+			return observabilityRouteLabel(r)
+		},
+	}))
+	router.Use(requestLogger(logger, obsRuntime))
 
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]any{
@@ -103,7 +116,10 @@ func newRouter(cfg config.Config, logger *slog.Logger, verifier auth.Verifier, u
 		})
 	})
 
-	path, handler := userv1connect.NewUserServiceHandler(userService, connect.WithInterceptors(auth.NewAuthInterceptor(verifier)))
+	path, handler := userv1connect.NewUserServiceHandler(
+		userService,
+		connect.WithInterceptors(auth.NewAuthInterceptor(verifier)),
+	)
 	router.Mount(path, handler)
 
 	return router

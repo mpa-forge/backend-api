@@ -4,6 +4,8 @@ go 1.25.0
 
 toolchain go1.25.1
 
+replace github.com/mpa-forge/platform-observability => ../platform-observability
+
 require (
 	connectrpc.com/connect v1.19.1
 	github.com/go-chi/chi/v5 v5.2.5

@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
+	"github.com/mpa-forge/platform-observability/backendobs"
 )
 
 var localFrontendOrigins = map[string]struct{}{
@@ -13,7 +15,7 @@ var localFrontendOrigins = map[string]struct{}{
 	"http://127.0.0.1:3000": {},
 }
 
-func requestLogger(logger *slog.Logger) func(http.Handler) http.Handler {
+func requestLogger(logger *slog.Logger, obsRuntime *backendobs.Runtime) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			startedAt := time.Now()
@@ -21,17 +23,35 @@ func requestLogger(logger *slog.Logger) func(http.Handler) http.Handler {
 
 			next.ServeHTTP(wrapped, r)
 
-			logger.Info(
-				"http request completed",
+			attrs := []any{
 				slog.String("request_id", chimiddleware.GetReqID(r.Context())),
 				slog.String("method", r.Method),
 				slog.String("path", r.URL.Path),
 				slog.Int("status", wrapped.Status()),
 				slog.Int("bytes", wrapped.BytesWritten()),
 				slog.Duration("duration", time.Since(startedAt)),
-			)
+			}
+			for _, attr := range obsRuntime.CorrelationAttrs(r.Context()) {
+				attrs = append(attrs, attr)
+			}
+
+			logger.Info("http request completed", attrs...)
 		})
 	}
+}
+
+func observabilityRouteLabel(r *http.Request) string {
+	if routeCtx := chi.RouteContext(r.Context()); routeCtx != nil {
+		if routePattern := routeCtx.RoutePattern(); routePattern != "" {
+			return routePattern
+		}
+	}
+
+	if r.URL == nil || r.URL.Path == "" {
+		return "unknown"
+	}
+
+	return r.URL.Path
 }
 
 func browserCORS(appEnv string) func(http.Handler) http.Handler {

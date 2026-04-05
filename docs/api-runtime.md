@@ -16,6 +16,13 @@ live in `openspec/specs/api-runtime/spec.md`.
   to `balanced`
 - startup now initializes the shared backend observability runtime from
   `github.com/mpa-forge/platform-observability/backendobs`
+- inbound HTTP requests now go through `backendobs.Runtime.Middleware(...)` so
+  public routes and protected Connect procedures share one server span and the
+  baseline HTTP request metrics path
+- protected Connect requests enrich the active request span with the Connect
+  procedure, auth result, and Connect failure code when a request fails
+- request completion logs now add `trace_id`, `span_id`, and `trace_sampled`
+  when the active request is running inside a traced context
 - telemetry-enabled runtimes require:
   - `OTEL_EXPORTER_OTLP_ENDPOINT`
   - `GRAFANA_CLOUD_INSTANCE_ID`
@@ -30,6 +37,17 @@ live in `openspec/specs/api-runtime/spec.md`.
 - in `local`, the runtime now allows browser CORS requests from
   `http://localhost:3000` and `http://127.0.0.1:3000` so the frontend SPA can
   call the protected Connect procedures directly
+
+## Local Verification
+
+- the current workspace resolves `github.com/mpa-forge/platform-observability`
+  through the sibling `../platform-observability` checkout so `backend-api`
+  consumes the latest shared `backendobs` helper methods during implementation
+- run `go test ./internal/api ./internal/auth` to verify:
+  - disabled-mode request handling
+  - OTLP export of public endpoint spans and metrics
+  - OTLP export of protected Connect procedure metadata and failure mapping
+  - trace correlation fields on request completion logs
 
 ## Update Rule
 

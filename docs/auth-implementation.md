@@ -19,6 +19,9 @@ live in `openspec/specs/api-authentication/spec.md`.
 - unsupported role claims return `403`; missing or invalid tokens return `401`
 - authenticated profile procedures use the verified Clerk `sub` as the local
   identity key
+- the auth interceptor now enriches the active request span with the Connect
+  procedure identity, auth result, and Connect failure code so protected API
+  traces stay correlated without creating a second server span
 
 ## Update Rule
 

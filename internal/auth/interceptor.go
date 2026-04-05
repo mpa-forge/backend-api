@@ -7,6 +7,9 @@ import (
 	"strings"
 
 	"connectrpc.com/connect"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	traceapi "go.opentelemetry.io/otel/trace"
 )
 
 // Verifier validates a bearer token and returns the authenticated principal.
@@ -26,24 +29,44 @@ type authInterceptor struct {
 
 func (i authInterceptor) WrapUnary(next connect.UnaryFunc) connect.UnaryFunc {
 	return func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
+		procedureAttrs := connectSpanAttributes(req)
+		setSpanAttributes(ctx, procedureAttrs...)
+
 		token, err := bearerToken(req.Header().Get("Authorization"))
 		if err != nil {
-			return nil, connect.NewError(connect.CodeUnauthenticated, err)
+			connectErr := connect.NewError(connect.CodeUnauthenticated, err)
+			recordConnectError(ctx, connectErr, append(procedureAttrs, attribute.String("auth.result", "missing_bearer_token"))...)
+			return nil, connectErr
 		}
 
 		principal, err := i.verifier.VerifyToken(ctx, token)
 		if err != nil {
 			switch {
 			case errors.Is(err, ErrUnauthenticated):
-				return nil, connect.NewError(connect.CodeUnauthenticated, err)
+				connectErr := connect.NewError(connect.CodeUnauthenticated, err)
+				recordConnectError(ctx, connectErr, append(procedureAttrs, attribute.String("auth.result", "unauthenticated"))...)
+				return nil, connectErr
 			case errors.Is(err, ErrForbidden):
-				return nil, connect.NewError(connect.CodePermissionDenied, err)
+				connectErr := connect.NewError(connect.CodePermissionDenied, err)
+				recordConnectError(ctx, connectErr, append(procedureAttrs, attribute.String("auth.result", "forbidden"))...)
+				return nil, connectErr
 			default:
-				return nil, connect.NewError(connect.CodeInternal, fmt.Errorf("verify bearer token: %w", err))
+				connectErr := connect.NewError(connect.CodeInternal, fmt.Errorf("verify bearer token: %w", err))
+				recordConnectError(ctx, connectErr, append(procedureAttrs, attribute.String("auth.result", "error"))...)
+				return nil, connectErr
 			}
 		}
 
-		return next(WithPrincipal(ctx, principal), req)
+		ctx = WithPrincipal(ctx, principal)
+		setSpanAttributes(ctx, append(procedureAttrs, attribute.String("auth.result", "authenticated"))...)
+
+		resp, err := next(ctx, req)
+		if err != nil {
+			recordConnectError(ctx, err, procedureAttrs...)
+			return resp, err
+		}
+
+		return resp, nil
 	}
 }
 
@@ -66,4 +89,46 @@ func bearerToken(authorization string) (string, error) {
 	}
 
 	return strings.TrimSpace(token), nil
+}
+
+func connectSpanAttributes(req connect.AnyRequest) []attribute.KeyValue {
+	procedure := strings.TrimSpace(req.Spec().Procedure)
+	attrs := []attribute.KeyValue{attribute.String("rpc.system", "connect")}
+	if procedure == "" {
+		return attrs
+	}
+
+	attrs = append(attrs, attribute.String("rpc.connect.procedure", procedure))
+
+	trimmed := strings.TrimPrefix(procedure, "/")
+	service, method, found := strings.Cut(trimmed, "/")
+	if found {
+		attrs = append(attrs,
+			attribute.String("rpc.service", service),
+			attribute.String("rpc.method", method),
+		)
+	}
+
+	return attrs
+}
+
+func setSpanAttributes(ctx context.Context, attrs ...attribute.KeyValue) {
+	span := traceapi.SpanFromContext(ctx)
+	if !span.SpanContext().IsValid() || len(attrs) == 0 {
+		return
+	}
+
+	span.SetAttributes(attrs...)
+}
+
+func recordConnectError(ctx context.Context, err error, attrs ...attribute.KeyValue) {
+	span := traceapi.SpanFromContext(ctx)
+	if !span.SpanContext().IsValid() {
+		return
+	}
+
+	code := connect.CodeOf(err).String()
+	span.SetAttributes(append(attrs, attribute.String("rpc.connect.code", code))...)
+	span.RecordError(err)
+	span.SetStatus(codes.Error, code)
 }
