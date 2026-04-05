@@ -61,7 +61,7 @@ func main() {
 	}
 	defer pool.Close()
 
-	if err := api.Run(ctx, cfg, logger, usersvc.NewServer(database.NewProfileStore(pool))); err != nil {
+	if err := api.Run(ctx, cfg, logger, observabilityRuntime, usersvc.NewServer(database.NewProfileStore(pool))); err != nil {
 		logger.Error("api runtime stopped with error", slog.Any("error", err))
 		os.Exit(1)
 	}

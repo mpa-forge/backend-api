@@ -37,6 +37,7 @@ func TestProvisioningAndGetCurrentUserWithPostgres(t *testing.T) {
 	handler := newRouter(
 		config.Config{AppEnv: "test"},
 		slog.New(slog.NewTextHandler(io.Discard, nil)),
+		nil,
 		staticVerifier{principal: auth.Principal{
 			UserID:      "clerk_api_integration_user",
 			Email:       "api.integration@example.com",

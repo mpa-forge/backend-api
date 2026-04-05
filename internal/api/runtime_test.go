@@ -19,6 +19,7 @@ func TestNewRouterServesHealthAndConnectRoutes(t *testing.T) {
 	handler := newRouter(
 		config.Config{AppEnv: "test"},
 		slog.New(slog.NewTextHandler(io.Discard, nil)),
+		nil,
 		staticVerifier{principal: auth.Principal{UserID: "user_123", Email: "user@example.com", DisplayName: "Example User", Role: auth.RoleUser}},
 		usersvc.NewServer(&fakeProfileStore{
 			getProfile: database.UserProfile{
@@ -139,6 +140,7 @@ func TestNewRouterRejectsUnauthorizedAndForbiddenConnectRequests(t *testing.T) {
 			handler := newRouter(
 				config.Config{AppEnv: "test"},
 				slog.New(slog.NewTextHandler(io.Discard, nil)),
+				nil,
 				test.verifier,
 				usersvc.NewServer(&fakeProfileStore{}),
 			)
@@ -166,6 +168,7 @@ func TestNewRouterAllowsConfiguredLocalFrontendOriginsForConnectRequests(t *test
 	handler := newRouter(
 		config.Config{AppEnv: "local"},
 		slog.New(slog.NewTextHandler(io.Discard, nil)),
+		nil,
 		staticVerifier{},
 		usersvc.NewServer(&fakeProfileStore{}),
 	)
@@ -199,6 +202,7 @@ func TestNewRouterDoesNotAllowUnknownOriginsForPreflight(t *testing.T) {
 	handler := newRouter(
 		config.Config{AppEnv: "local"},
 		slog.New(slog.NewTextHandler(io.Discard, nil)),
+		nil,
 		staticVerifier{},
 		usersvc.NewServer(&fakeProfileStore{}),
 	)
