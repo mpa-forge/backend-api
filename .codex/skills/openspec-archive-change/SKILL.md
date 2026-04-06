@@ -13,7 +13,7 @@ Archive a completed change in the experimental workflow.
 
 **Input**: Optionally specify a change name. If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
 
-## Steps
+**Steps**
 
 1. **If no change name provided, prompt for selection**
 
@@ -68,7 +68,6 @@ Archive a completed change in the experimental workflow.
 5. **Perform the archive**
 
    Create the archive directory if it doesn't exist:
-
    ```bash
    mkdir -p openspec/changes/archive
    ```
@@ -92,9 +91,9 @@ Archive a completed change in the experimental workflow.
    - Whether specs were synced (if applicable)
    - Note about any warnings (incomplete artifacts/tasks)
 
-## Output On Success
+**Output On Success**
 
-```text
+```
 ## Archive Complete
 
 **Change:** <change-name>
@@ -105,8 +104,7 @@ Archive a completed change in the experimental workflow.
 All artifacts complete. All tasks complete.
 ```
 
-## Guardrails
-
+**Guardrails**
 - Always prompt for change selection if not provided
 - Use artifact graph (openspec status --json) for completion checking
 - Don't block archive on warnings - just inform and confirm

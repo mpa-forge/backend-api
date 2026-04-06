@@ -148,6 +148,17 @@ func TestPublicEndpointExportsServerTelemetry(t *testing.T) {
 	if got := intTraceAttr(span.Attributes, "http.response.status_code"); got != http.StatusOK {
 		t.Fatalf("http.response.status_code = %d, want %d", got, http.StatusOK)
 	}
+	if !capture.hasTraceResourceAttrs(
+		map[string]string{
+			"service.name":                             "backend-api",
+			"service.version":                          "test",
+			"deployment.environment":                   "test",
+			"platform.observability.runtime_mode":      "direct_otlp",
+			"platform.observability.telemetry_profile": "balanced",
+		},
+	) {
+		t.Fatal("trace resource attributes missing expected observability identity labels")
+	}
 
 	if !capture.hasMetricDatapoint(
 		httpRequestCountMetricName,
@@ -170,6 +181,17 @@ func TestPublicEndpointExportsServerTelemetry(t *testing.T) {
 		map[string]int64{"http.response.status_code": http.StatusOK},
 	) {
 		t.Fatalf("request duration metric missing normalized attributes")
+	}
+	if !capture.hasMetricResourceAttrs(
+		map[string]string{
+			"service.name":                             "backend-api",
+			"service.version":                          "test",
+			"deployment.environment":                   "test",
+			"platform.observability.runtime_mode":      "direct_otlp",
+			"platform.observability.telemetry_profile": "balanced",
+		},
+	) {
+		t.Fatal("metric resource attributes missing expected observability identity labels")
 	}
 }
 
@@ -419,6 +441,36 @@ func (c *otlpCapture) hasMetricDatapoint(name string, wantStrings map[string]str
 						return true
 					}
 				}
+			}
+		}
+	}
+
+	return false
+}
+
+func (c *otlpCapture) hasTraceResourceAttrs(want map[string]string) bool {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	for _, req := range c.traceRequests {
+		for _, resourceSpans := range req.ResourceSpans {
+			if attrsMatch(resourceSpans.Resource.Attributes, want, nil) {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+func (c *otlpCapture) hasMetricResourceAttrs(want map[string]string) bool {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	for _, req := range c.metricRequests {
+		for _, resourceMetrics := range req.ResourceMetrics {
+			if attrsMatch(resourceMetrics.Resource.Attributes, want, nil) {
+				return true
 			}
 		}
 	}

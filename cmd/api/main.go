@@ -45,6 +45,7 @@ func main() {
 	}()
 
 	metadata := observabilityRuntime.Metadata()
+	policy := observabilityRuntime.Policy()
 	logger.Info(
 		"initialized observability runtime",
 		slog.String("service", metadata.ServiceName),
@@ -52,6 +53,9 @@ func main() {
 		slog.String("environment", metadata.Environment),
 		slog.String("telemetry_mode", string(metadata.Mode)),
 		slog.String("telemetry_profile", string(metadata.Profile)),
+		slog.Float64("trace_sample_ratio", policy.TraceSampleRatio),
+		slog.Duration("force_sample_after", policy.HighLatencyThreshold),
+		slog.Bool("cost_profile_drops_success_duration_metrics", policy.DropSuccessfulRequestDurationMetrics),
 	)
 
 	pool, err := database.OpenPool(ctx, cfg.DatabaseURL)
