@@ -1,0 +1,7 @@
+---
+interface:
+  display_name: "OpenSpec PR Prep"
+  short_description: "Draft PR summaries for synced OpenSpec + code changes"
+  default_prompt: >-
+    Use $openspec-pr-prep to summarize this branch's synced OpenSpec and code
+    changes for a PR.

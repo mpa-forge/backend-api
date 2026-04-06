@@ -37,6 +37,16 @@ func TestNewObservabilityRuntimeUsesSharedConfig(t *testing.T) {
 	if metadata.Mode != "disabled" {
 		t.Fatalf("Mode = %q, want %q", metadata.Mode, "disabled")
 	}
+	policy := runtime.Policy()
+	if policy.TraceSampleRatio != 1 {
+		t.Fatalf("TraceSampleRatio = %v, want 1 for local disabled runtime", policy.TraceSampleRatio)
+	}
+	if policy.HighLatencyThreshold <= 0 {
+		t.Fatalf("HighLatencyThreshold = %v, want positive threshold", policy.HighLatencyThreshold)
+	}
+	if !policy.DropSuccessfulRequestDurationMetrics {
+		t.Fatal("DropSuccessfulRequestDurationMetrics = false, want true for cost profile")
+	}
 }
 
 func TestBuildVersionFallsBackToDev(t *testing.T) {

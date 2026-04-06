@@ -23,6 +23,9 @@ live in `openspec/specs/api-runtime/spec.md`.
   procedure, auth result, and Connect failure code when a request fails
 - request completion logs now add `trace_id`, `span_id`, and `trace_sampled`
   when the active request is running inside a traced context
+- startup diagnostics now include the resolved trace sample ratio, the initial
+  high-latency force-sample threshold, and whether the `cost` profile reduces
+  successful request-duration metrics
 - telemetry-enabled runtimes require:
   - `OTEL_EXPORTER_OTLP_ENDPOINT`
   - `GRAFANA_CLOUD_INSTANCE_ID`
@@ -47,6 +50,7 @@ live in `openspec/specs/api-runtime/spec.md`.
   - disabled-mode request handling
   - OTLP export of public endpoint spans and metrics
   - OTLP export of protected Connect procedure metadata and failure mapping
+  - resource labels for service identity, runtime mode, and telemetry profile
   - trace correlation fields on request completion logs
 
 ## Update Rule

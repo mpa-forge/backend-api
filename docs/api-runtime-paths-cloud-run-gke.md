@@ -18,6 +18,9 @@ requirements now live in `openspec/specs/api-runtime-path-selection/spec.md`.
 - GKE deployments use the collector or alloy gateway telemetry path
 - both paths use the shared backend observability package and
   `OBS_TELEMETRY_PROFILE`
+- both paths now rely on the same shared policy contract for trace sampling,
+  force-sample rules, and startup diagnostics even though the collector path
+  can apply extra downstream processors
 - runtime-path switches remain runbook-driven and reversible
 
 ## Update Rule
