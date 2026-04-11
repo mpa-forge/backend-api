@@ -1,0 +1,129 @@
+version: 1
+service: backend-api
+task: P3-T07
+phase: Phase 3 observability baseline
+scope:
+  environment: rc
+  grafana_folder: Platform / RC
+  dashboard_uids:
+    api_golden_signals: bp-api-golden-signals
+    runtime_path_status: bp-runtime-path-status
+    db_connectivity_symptoms: bp-db-connectivity-symptoms
+query_contract:
+  metrics:
+    request_count: http_server_request_count_total
+    request_duration_bucket: http_server_request_duration_seconds_bucket
+  required_labels:
+    - service_name
+    - deployment_environment
+    - platform_observability_runtime_mode
+    - platform_observability_telemetry_profile
+    - http_route
+    - http_request_method
+    - http_response_status_class
+  notes:
+    - >
+      These rules intentionally follow the same Prometheus-style translated metric
+      names and low-cardinality label contract used by the Phase 3 dashboard
+      JSON in platform-infra.
+    - >
+      Availability is an application-success proxy in Phase 3. The platform does
+      not yet have a dedicated external uptime probe metric in source control, so
+      the availability rule uses sustained 5xx behavior plus a minimum traffic
+      floor instead of black-box uptime.
+routing_profiles:
+  phase3-p1-immediate:
+    summary: >
+      Route immediately to the baseline page or webhook destination, Slack, and
+      the alert-to-AI webhook.
+  phase3-p2-notify-then-page:
+    summary: >
+      Notify Slack and the alert-to-AI webhook immediately. If still
+      unacknowledged after 15 minutes, duplicate the alert to the baseline page
+      or webhook destination.
+alerts:
+  - key: backend-api-availability-proxy-p1
+    title: Backend API availability proxy below rc floor
+    signal: availability
+    severity: P1
+    lookback: 5m
+    pending_for: 5m
+    min_request_rate_rps: 0.10
+    expr: >-
+      (
+        1 - (
+          sum(rate(http_server_request_count_total{deployment_environment="rc",service_name="backend-api",http_response_status_class=~"5xx"}[5m])) /
+          clamp_min(sum(rate(http_server_request_count_total{deployment_environment="rc",service_name="backend-api"}[5m])), 0.001)
+        )
+      ) < 0.99
+      and
+      sum(rate(http_server_request_count_total{deployment_environment="rc",service_name="backend-api"}[5m])) >= 0.10
+    why: >
+      Matches the provisional rc availability floor from the platform baseline.
+      This is a service-level success proxy until explicit uptime probes are
+      carried as a first-class alert signal.
+    routing_profile: phase3-p1-immediate
+    dashboard_uid: bp-api-golden-signals
+    synthetic_trigger: >
+      Induce sustained 5xx responses on protected user-service traffic in rc
+      while keeping at least 0.10 requests per second. The simplest safe path is
+      a short-lived rc canary that breaks the backing Postgres dependency for the
+      user profile handlers while replay traffic continues to hit the service.
+  - key: backend-api-error-rate-p2
+    title: Backend API protected procedure 5xx ratio above 5 percent
+    signal: error_rate
+    severity: P2
+    lookback: 10m
+    pending_for: 10m
+    min_request_rate_rps: 0.05
+    expr: >-
+      (
+        sum(rate(http_server_request_count_total{deployment_environment="rc",service_name="backend-api",http_route=~"/blueprint\\.user\\.v1\\.UserService/.+",http_response_status_class="5xx"}[10m])) /
+        clamp_min(sum(rate(http_server_request_count_total{deployment_environment="rc",service_name="backend-api",http_route=~"/blueprint\\.user\\.v1\\.UserService/.+"}[10m])), 0.001)
+      ) > 0.05
+      and
+      sum(rate(http_server_request_count_total{deployment_environment="rc",service_name="backend-api",http_route=~"/blueprint\\.user\\.v1\\.UserService/.+"}[10m])) >= 0.05
+    why: >
+      Keeps the more actionable error-rate rule focused on the authenticated
+      Connect procedures that depend on database work and represent real product
+      traffic, rather than on health endpoints.
+    routing_profile: phase3-p2-notify-then-page
+    dashboard_uid: bp-db-connectivity-symptoms
+    synthetic_trigger: >
+      Break rc database connectivity or ship a short-lived rc canary that
+      forces protected user-service handlers to return 5xx responses, then drive
+      authenticated replay traffic through the affected procedures for more than
+      10 minutes.
+  - key: backend-api-latency-p2
+    title: Backend API protected procedure p95 latency above 1 second
+    signal: latency
+    severity: P2
+    lookback: 10m
+    pending_for: 15m
+    min_request_rate_rps: 0.05
+    expr: >-
+      histogram_quantile(
+        0.95,
+        sum by (le) (
+          rate(http_server_request_duration_seconds_bucket{deployment_environment="rc",service_name="backend-api",http_route=~"/blueprint\\.user\\.v1\\.UserService/.+"}[10m])
+        )
+      ) > 1
+      and
+      sum(rate(http_server_request_count_total{deployment_environment="rc",service_name="backend-api",http_route=~"/blueprint\\.user\\.v1\\.UserService/.+"}[10m])) >= 0.05
+    why: >
+      Uses the provisional rc p95 latency budget already locked in planning
+      docs. The longer pending window reduces noise from short warmup spikes.
+    routing_profile: phase3-p2-notify-then-page
+    dashboard_uid: bp-db-connectivity-symptoms
+    synthetic_trigger: >
+      Run a short-lived rc canary that injects more than 1 second of latency in
+      the database-backed user-service path, or otherwise create a controlled DB
+      slowdown while authenticated replay traffic continues for at least
+      15 minutes.
+future_prod_notes:
+  availability_floor: 99.5 percent monthly target
+  latency_floor: 750 ms p95 provisional target
+  comment: >
+    Prod should reuse the same rule shapes with stricter thresholds once prod
+    traffic and alert routing are activated. Keep the rule names and labels
+    stable so Phase 5 authoritative provisioning can adopt them without churn.

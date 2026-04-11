@@ -70,6 +70,8 @@ The API runtime now validates all of the variables above at startup and exits
 before binding a port when required values are missing or malformed.
 See `docs/api-runtime.md` for endpoint and runtime details and
 `docs/auth-implementation.md` for the auth enforcement internals.
+See `docs/api-alerting.md` for the Phase 3 backend-api alert contract and rule
+manifest that feed Grafana Cloud bootstrap alerting.
 The shared observability startup contract now uses:
 
 - `OTEL_MODE=disabled|direct_otlp|collector_gateway`
