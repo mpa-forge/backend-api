@@ -135,6 +135,19 @@ See `docs/database-migrations.md` for details.
 - The image packages the `cmd/api` runtime skeleton
 - Runtime configuration is still supplied through environment variables at container start
 - The container healthcheck follows the configured `HTTP_PORT`
+- CI pull requests now verify the canonical Docker build through the shared Go
+  reusable workflow without publishing a registry artifact
+- CI pushes to `main` and semver tags `v*` now route through the shared Go
+  reusable workflow for `backend-api` image publishing
+- Published image tags follow the shared GAR naming standard:
+  `sha-<git_sha_12>` is always emitted and semver refs additionally publish the
+  matching `v<semver>` alias
+- The shared workflow reads these repository variables when GAR/WIF publishing
+  is configured: `GCP_GAR_LOCATION`, `GCP_PROJECT_ID`,
+  `GCP_GAR_REPOSITORY_APPS`, `GCP_WORKLOAD_IDENTITY_PROVIDER`, and
+  `GCP_CI_SERVICE_ACCOUNT`
+- Until the Phase 4 GAR/WIF bootstrap is in place, the publish job records a
+  skipped publish summary instead of attempting unauthenticated pushes
 
 ## Local Stack
 
