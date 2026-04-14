@@ -6,17 +6,29 @@ on:
   push:
     branches:
       - main
+    tags:
+      - "v*"
 
 permissions:
   contents: read
+  id-token: write
   pull-requests: read
 
 jobs:
   ci:
-    uses: mpa-forge/.github/.github/workflows/reusable-ci-go.yml@e7433006b2ffe574d4518f7044e84082bab05e4d
+    uses: mpa-forge/.github/.github/workflows/reusable-ci-go.yml@ced7bfe84128d674daf9b24a5d8cd0a16c979e61
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     with:
       working-directory: "."
       sonar-organization-key: "mpa-forge"
       sonar-project-key: "mpa-forge_backend-api"
+      image-build-enabled: true
+      image-name: "backend-api"
+      image-context: "."
+      image-dockerfile: "Dockerfile"
+      gar-location: ${{ vars.GCP_GAR_LOCATION }}
+      gar-project-id: ${{ vars.GCP_PROJECT_ID }}
+      gar-repository: ${{ vars.GCP_GAR_REPOSITORY_APPS }}
+      gcp-workload-identity-provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+      gcp-service-account: ${{ vars.GCP_CI_SERVICE_ACCOUNT }}
