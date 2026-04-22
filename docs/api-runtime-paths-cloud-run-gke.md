@@ -21,6 +21,9 @@ requirements now live in `openspec/specs/api-runtime-path-selection/spec.md`.
 - both paths now rely on the same shared policy contract for trace sampling,
   force-sample rules, and startup diagnostics even though the collector path
   can apply extra downstream processors
+- Cloud Run uses split database environment variables: `DB_HOST` with the
+  mounted Cloud SQL socket path, `DB_NAME`, `DB_USER`, and Secret
+  Manager-backed `DB_PASSWORD`
 - runtime-path switches remain runbook-driven and reversible
 
 ## Update Rule

@@ -54,7 +54,7 @@ func LoadFromEnv() (Config, error) {
 	cfg.AppEnv = requireNonEmptyEnv("APP_ENV", &problems)
 	cfg.LogLevel = parseLogLevel(requireNonEmptyEnv("LOG_LEVEL", &problems), &problems)
 	cfg.HTTPPort = parsePort(requireNonEmptyEnv("HTTP_PORT", &problems), &problems)
-	cfg.DatabaseURL = parseRequiredURLString("DATABASE_URL", &problems)
+	cfg.DatabaseURL = LoadDatabaseURLFromEnv(&problems)
 	cfg.AuthIssuerURL = parseAbsoluteURL("AUTH_ISSUER_URL", requireNonEmptyEnv("AUTH_ISSUER_URL", &problems), &problems)
 	cfg.AuthAudience = parseAudience("AUTH_AUDIENCE", requireNonEmptyEnv("AUTH_AUDIENCE", &problems), &problems)
 	cfg.Telemetry.Mode = parseTelemetryMode(requireNonEmptyEnv("OTEL_MODE", &problems), &problems)
@@ -90,6 +90,49 @@ func LoadFromEnv() (Config, error) {
 	}
 
 	return cfg, nil
+}
+
+// LoadDatabaseURLFromEnv returns the Postgres connection string accepted by
+// runtime and migration commands. DATABASE_URL remains supported for local
+// compatibility; cloud runtimes can instead provide split DB_* values.
+func LoadDatabaseURLFromEnv(problems *[]string) string {
+	if databaseURL := strings.TrimSpace(os.Getenv("DATABASE_URL")); databaseURL != "" {
+		if parseAbsoluteURL("DATABASE_URL", databaseURL, problems) == nil {
+			return ""
+		}
+
+		return databaseURL
+	}
+
+	dbHost := requireNonEmptyEnv("DB_HOST", problems)
+	dbName := requireNonEmptyEnv("DB_NAME", problems)
+	dbUser := requireNonEmptyEnv("DB_USER", problems)
+	dbPassword := requireNonEmptyEnv("DB_PASSWORD", problems)
+	if dbHost == "" || dbName == "" || dbUser == "" || dbPassword == "" {
+		return ""
+	}
+
+	return composePostgresURL(dbHost, dbName, dbUser, dbPassword)
+}
+
+func composePostgresURL(dbHost, dbName, dbUser, dbPassword string) string {
+	dsn := url.URL{
+		Scheme: "postgres",
+		User:   url.UserPassword(dbUser, dbPassword),
+		Path:   "/" + strings.TrimPrefix(dbName, "/"),
+	}
+	query := url.Values{}
+	query.Set("sslmode", "disable")
+
+	if strings.HasPrefix(dbHost, "/") {
+		query.Set("host", dbHost)
+	} else {
+		dsn.Host = dbHost
+	}
+
+	dsn.RawQuery = query.Encode()
+
+	return dsn.String()
 }
 
 func lookupEnv(name string, problems *[]string) (string, bool) {
@@ -143,19 +186,6 @@ func parsePort(value string, problems *[]string) int {
 	}
 
 	return port
-}
-
-func parseRequiredURLString(name string, problems *[]string) string {
-	value := requireNonEmptyEnv(name, problems)
-	if value == "" {
-		return ""
-	}
-
-	if parseAbsoluteURL(name, value, problems) == nil {
-		return ""
-	}
-
-	return value
 }
 
 func parseAbsoluteURL(name, value string, problems *[]string) *url.URL {

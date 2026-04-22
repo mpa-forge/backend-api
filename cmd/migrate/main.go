@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
+	"github.com/mpa-forge/backend-api/internal/config"
 	"github.com/mpa-forge/backend-api/internal/database"
 )
 
@@ -13,9 +15,10 @@ func main() {
 		fail("usage: go run ./cmd/migrate [up|down|seed|prepare]")
 	}
 
-	databaseURL := os.Getenv("DATABASE_URL")
+	var problems []string
+	databaseURL := config.LoadDatabaseURLFromEnv(&problems)
 	if databaseURL == "" {
-		fail("DATABASE_URL is required")
+		fail(fmt.Sprintf("invalid database configuration:\n- %s", strings.Join(problems, "\n- ")))
 	}
 
 	migrator := database.NewMigrator(databaseURL)
