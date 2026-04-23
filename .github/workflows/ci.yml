@@ -11,12 +11,15 @@ on:
 
 permissions:
   contents: read
-  id-token: write
   pull-requests: read
 
 jobs:
   ci:
     uses: mpa-forge/.github/.github/workflows/reusable-ci-go.yml@main
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: read
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     with:
