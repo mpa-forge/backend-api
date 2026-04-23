@@ -13,8 +13,9 @@ Use this skill when work touches git flow, release policy, or versioning decisio
 2. Merge into `main` only through a PR.
 3. Keep `main` protected and never push to it directly.
 4. Never create commits on local `main`; branch before the first commit.
-5. Use squash merge on `main`.
-6. Treat release tags as the production promotion boundary.
+5. Detect the repository's allowed merge methods before merging the PR.
+6. Use an allowed merge method on `main`, preferring squash when the repo policy permits it.
+7. Treat release tags as the production promotion boundary.
 
 ## Branch Policy
 
@@ -46,9 +47,14 @@ Baseline required checks:
 
 ## Merge Strategy
 
-- squash merge only on `main`
+- Do not assume every repo allows the same merge method.
+- Determine the allowed merge strategy before attempting merge.
+  - Prefer repository metadata or existing repo policy docs when available.
+  - If policy is not documented locally, inspect the PR or repo settings through the available GitHub tooling before choosing a merge command.
+- Prefer squash merge on `main` when the repository allows it.
+- If squash merge is not allowed, use another allowed strategy instead of retrying blindly with the same command.
 
-Use this to keep history clean, make rollback easier by PR unit, and simplify AI-generated iterative work.
+Use this to keep history clean, make rollback easier by PR unit, and avoid failed merge attempts caused by repo-specific restrictions.
 
 ## Versioning
 
@@ -92,6 +98,12 @@ After squash-merged work:
 - pull latest `origin/main`
 - delete the local feature branch if it still exists
 - verify the worktree is clean
+
+After any merged work:
+
+- verify the PR is actually merged before cleaning up
+- delete the remote branch when the hosting workflow allows it
+- if local `main` was behind, fast-forward it before continuing more work
 
 ## Contract Compatibility Rule
 

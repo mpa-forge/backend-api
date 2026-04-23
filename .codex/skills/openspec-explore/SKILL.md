@@ -32,30 +32,26 @@ Enter explore mode. Think deeply. Visualize freely. Follow the conversation wher
 
 Depending on what the user brings, you might:
 
-### Explore the problem space
-
+**Explore the problem space**
 - Ask clarifying questions that emerge from what they said
 - Challenge assumptions
 - Reframe the problem
 - Find analogies
 
-### Investigate the codebase
-
+**Investigate the codebase**
 - Map existing architecture relevant to the discussion
 - Find integration points
 - Identify patterns already in use
 - Surface hidden complexity
 
-### Compare options
-
+**Compare options**
 - Brainstorm multiple approaches
 - Build comparison tables
 - Sketch tradeoffs
 - Recommend a path (if asked)
 
-### Visualize
-
-```text
+**Visualize**
+```
 ┌─────────────────────────────────────────┐
 │     Use ASCII diagrams liberally        │
 ├─────────────────────────────────────────┤
@@ -72,8 +68,7 @@ Depending on what the user brings, you might:
 └─────────────────────────────────────────┘
 ```
 
-### Surface risks and unknowns
-
+**Surface risks and unknowns**
 - Identify what could go wrong
 - Find gaps in understanding
 - Suggest spikes or investigations
@@ -87,13 +82,11 @@ You have full context of the OpenSpec system. Use it naturally, don't force it.
 ### Check for context
 
 At the start, quickly check what exists:
-
 ```bash
 openspec list --json
 ```
 
 This tells you:
-
 - If there are active changes
 - Their names, schemas, and status
 - What the user might be working on
@@ -122,7 +115,7 @@ If the user mentions a change or you detect one is relevant:
 3. **Offer to capture when decisions are made**
 
    | Insight Type | Where to Capture |
-   | ------------ | ---------------- |
+   |--------------|------------------|
    | New requirement discovered | `specs/<capability>/spec.md` |
    | Requirement changed | `specs/<capability>/spec.md` |
    | Design decision made | `design.md` |
@@ -152,9 +145,8 @@ If the user mentions a change or you detect one is relevant:
 
 ## Handling Different Entry Points
 
-### User brings a vague idea
-
-```text
+**User brings a vague idea:**
+```
 User: I'm thinking about adding real-time collaboration
 
 You: Real-time collab is a big space. Let me think about this...
@@ -176,9 +168,8 @@ You: Real-time collab is a big space. Let me think about this...
       Where's your head at?
 ```
 
-### User brings a specific problem
-
-```text
+**User brings a specific problem:**
+```
 User: The auth system is a mess
 
 You: [reads codebase]
@@ -208,9 +199,8 @@ You: [reads codebase]
      I see three tangles. Which one's burning?
 ```
 
-### User is stuck mid-implementation
-
-```text
+**User is stuck mid-implementation:**
+```
 User: /opsx:explore add-auth-system
       The OAuth integration is more complex than expected
 
@@ -226,9 +216,8 @@ You: [reads change artifacts]
      Or add a spike task to investigate?
 ```
 
-### User wants to compare options
-
-```text
+**User wants to compare options:**
+```
 User: Should we use Postgres or SQLite?
 
 You: Generic answer is boring. What's the context?
@@ -254,7 +243,7 @@ You: That changes everything.
      SQLite. Not even close.
 
      Unless... is there a sync component?
-```text
+```
 
 ---
 
@@ -269,8 +258,7 @@ There's no required ending. Discovery might:
 
 When it feels like things are crystallizing, you might summarize:
 
-```text
-
+```
 ## What We Figured Out
 
 **The problem**: [crystallized understanding]
@@ -280,7 +268,6 @@ When it feels like things are crystallizing, you might summarize:
 **Open questions**: [if any remain]
 
 **Next steps** (if ready):
-
 - Create a change proposal
 - Keep exploring: just keep talking
 ```

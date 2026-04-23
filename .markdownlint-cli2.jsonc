@@ -1,4 +1,8 @@
 {
+  "globs": [
+    "**/*.md",
+    "!**/.codex/skills/**/*.md"
+  ],
   "config": {
     "MD013": false,
     "MD033": false,

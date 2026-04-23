@@ -1,0 +1,7 @@
+---
+interface:
+  display_name: "OpenSpec Subagents"
+  short_description: "Plan OpenSpec delegation with explicit models and ownership"
+  default_prompt: >-
+    Use $openspec-subagents with the current OpenSpec change to decide where
+    sub-agents help and record the delegation plan in the task breakdown.
