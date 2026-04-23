@@ -59,7 +59,20 @@ Use this skill when the active session starts in `platform-blueprint-specs` but 
 - Commit planning-repo updates separately from implementation-repo changes.
 - When a task completes across several repos, update the planning repo after the implementation PRs are merged so the evidence reflects reality.
 
-### 5. Prefer deterministic repo-local entrypoints
+### 5. Publish each repo independently
+
+- Treat each touched repo as its own delivery unit even when one user request spans several repos.
+- Stage only the files that belong to the current repo and task; do not accidentally scoop up unrelated local files such as user-local `.codex` artifacts.
+- Push each repo's branch separately.
+- Open one PR per touched repo unless the repo is planning-only and intentionally left uncommitted.
+- Merge each PR with a strategy allowed by that repository.
+- After each merge:
+  - switch the local repo back to `main`
+  - fast-forward or pull `origin/main`
+  - delete the merged local branch when safe
+- Do not wait until the end of a multi-repo task to clean up branch state everywhere if one repo is already complete.
+
+### 6. Prefer deterministic repo-local entrypoints
 
 - If the workflow standardizes a reusable pattern across repos, keep the canonical template or reference in the planning repo and copy it into sibling repos as needed.
 - Repo-local files should remain the executable source of truth for that repo.
@@ -85,5 +98,7 @@ Before ending a session that uses this skill:
 - confirm the target sibling repos received the intended changes
 - confirm PRs were created and merged where required
 - update planning docs/tasks/evidence in `platform-blueprint-specs`
+- restore touched repos to local `main` tracking `origin/main` when the work is merged
 - clean up stale local branches in touched repos
 - verify clean git trees in touched repos unless the user asked to keep changes local
+- call out any intentionally untouched user-local files that remain untracked

@@ -13,7 +13,7 @@ Implement tasks from an OpenSpec change.
 
 **Input**: Optionally specify a change name. If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
 
-## Steps
+**Steps**
 
 1. **Select the change**
 
@@ -25,11 +25,9 @@ Implement tasks from an OpenSpec change.
    Always announce: "Using change: <name>" and how to override (e.g., `/opsx:apply <other>`).
 
 2. **Check status to understand the schema**
-
    ```bash
    openspec status --change "<name>" --json
    ```
-
    Parse the JSON to understand:
    - `schemaName`: The workflow being used (e.g., "spec-driven")
    - Which artifact contains the tasks (typically "tasks" for spec-driven, check status for others)
@@ -89,9 +87,9 @@ Implement tasks from an OpenSpec change.
    - If all done: suggest archive
    - If paused: explain why and wait for guidance
 
-## Output During Implementation
+**Output During Implementation**
 
-```text
+```
 ## Implementing: <change-name> (schema: <schema-name>)
 
 Working on task 3/7: <task description>
@@ -103,9 +101,9 @@ Working on task 4/7: <task description>
 ✓ Task complete
 ```
 
-## Output On Completion
+**Output On Completion**
 
-```text
+```
 ## Implementation Complete
 
 **Change:** <change-name>
@@ -120,9 +118,9 @@ Working on task 4/7: <task description>
 All tasks complete! Ready to archive this change.
 ```
 
-## Output On Pause (Issue Encountered)
+**Output On Pause (Issue Encountered)**
 
-```text
+```
 ## Implementation Paused
 
 **Change:** <change-name>
@@ -140,8 +138,7 @@ All tasks complete! Ready to archive this change.
 What would you like to do?
 ```
 
-## Guardrails
-
+**Guardrails**
 - Keep going through tasks until done or blocked
 - Always read context files before starting (from the apply instructions output)
 - If task is ambiguous, pause and ask before implementing
@@ -151,7 +148,7 @@ What would you like to do?
 - Pause on errors, blockers, or unclear requirements - don't guess
 - Use contextFiles from CLI output, don't assume specific file names
 
-## Fluid Workflow Integration
+**Fluid Workflow Integration**
 
 This skill supports the "actions on a change" model:
 

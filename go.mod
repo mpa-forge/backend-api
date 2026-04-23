@@ -10,7 +10,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/jackc/pgx/v5 v5.9.1
-	github.com/mpa-forge/platform-contracts v0.0.0-20260322195240-a7b2909c6aa0
+	github.com/mpa-forge/platform-contracts v0.0.0-20260412222342-4bc8b809a91e
 	github.com/mpa-forge/platform-observability v0.0.0-20260412215037-24cae5a585cb
 	go.opentelemetry.io/otel v1.43.0
 	go.opentelemetry.io/otel/sdk v1.43.0

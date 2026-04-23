@@ -18,6 +18,8 @@ persistence requirements now live in
   - `make sqlc-generate`
 - migration, seed, query, generated sqlc, and migrate entrypoint assets remain
   under `internal/database/` and `cmd/migrate/`
+- migration commands select the target database from `DATABASE_URL` when set,
+  or from split `DB_HOST`, `DB_NAME`, `DB_USER`, and `DB_PASSWORD` values
 - the baseline schema includes `user_profiles`
 - `user_profiles.clerk_user_id` remains the canonical persistence key for the
   verified Clerk `sub`
