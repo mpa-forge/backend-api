@@ -70,9 +70,11 @@ If `mise` or `asdf` is available, the script will use it to install the pinned t
 The API runtime now validates all of the variables above at startup and exits
 before binding a port when required values are missing or malformed.
 For local development, `DATABASE_URL` remains the shortest supported database
-configuration. Cloud runtimes can omit `DATABASE_URL` and provide `DB_HOST`,
-`DB_NAME`, `DB_USER`, and secret-backed `DB_PASSWORD`; `DB_HOST` accepts either
-`host[:port]` or a Cloud SQL socket path such as `/cloudsql/project:region:instance`.
+configuration. Cloud runtimes should leave `DATABASE_URL` unset and provide
+`DB_HOST`, `DB_NAME`, `DB_USER`, and secret-backed `DB_PASSWORD`; when those
+split values are present they take precedence so the runtime composes the final
+Postgres URL itself. `DB_HOST` accepts either `host[:port]` or a Cloud SQL
+socket path such as `/cloudsql/project:region:instance`.
 See `docs/api-runtime.md` for endpoint and runtime details and
 `docs/auth-implementation.md` for the auth enforcement internals.
 See `docs/api-alerting.md` for the Phase 3 backend-api alert contract and rule
@@ -135,7 +137,9 @@ Typical local flow:
 See `docs/database-migrations.md` for details.
 Migration commands use the same database configuration contract as the runtime:
 `DATABASE_URL` for local compatibility, or split `DB_HOST`, `DB_NAME`,
-`DB_USER`, and `DB_PASSWORD` values for Cloud SQL-oriented execution.
+`DB_USER`, and `DB_PASSWORD` values for Cloud SQL-oriented execution; cloud
+delivery keeps the password in `DB_PASSWORD` instead of a canonical
+`DATABASE_URL` secret.
 
 ## Container
 

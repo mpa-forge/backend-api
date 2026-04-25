@@ -11,10 +11,14 @@ validation, local run behavior, and the mounted public and Connect endpoints.
 
 The `backend-api` runtime SHALL validate its required startup configuration
 before binding an HTTP port. Required variables MUST include `APP_ENV`,
-`LOG_LEVEL`, `HTTP_PORT`, `DATABASE_URL`, `AUTH_ISSUER_URL`,
-`AUTH_AUDIENCE`, `OTEL_MODE`, `OBS_TELEMETRY_PROFILE`,
+`LOG_LEVEL`, `HTTP_PORT`, `AUTH_ISSUER_URL`, `AUTH_AUDIENCE`, `OTEL_MODE`,
+`OBS_TELEMETRY_PROFILE`,
 `OTEL_EXPORTER_OTLP_ENDPOINT`, `GRAFANA_CLOUD_INSTANCE_ID`, and
-`GRAFANA_OTLP_INGEST_TOKEN`.
+`GRAFANA_OTLP_INGEST_TOKEN`. Database configuration MUST accept either local
+`DATABASE_URL` or the split contract `DB_HOST`, `DB_NAME`, `DB_USER`, and
+`DB_PASSWORD`. When split database values are populated, the runtime MUST
+compose the final Postgres URL from those values instead of expecting a
+canonical `DATABASE_URL` secret.
 `OTEL_MODE` MUST accept only `disabled`, `direct_otlp`, or
 `collector_gateway`. `OBS_TELEMETRY_PROFILE` MUST accept only `balanced`,
 `cost`, or `debug`, and it MUST default to `balanced` when unset.
@@ -24,8 +28,15 @@ the OTLP endpoint and Grafana OTLP token ingredients MUST be present and valid.
 #### Scenario: Startup fails on missing required configuration
 
 - **WHEN** the API process starts without one of the required environment
-  variables
+  variables or without either supported database configuration form
 - **THEN** the runtime exits before binding the configured HTTP port
+
+#### Scenario: Split database inputs override a local database URL fallback
+
+- **WHEN** cloud runtime delivery populates `DB_HOST`, `DB_NAME`, `DB_USER`,
+  and `DB_PASSWORD`
+- **THEN** the runtime composes the database connection string from those
+  values and does not require a canonical `DATABASE_URL` secret
 
 #### Scenario: Telemetry configuration is required when enabled
 

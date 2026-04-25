@@ -31,8 +31,9 @@ live in `openspec/specs/api-runtime/spec.md`.
   - `GRAFANA_CLOUD_INSTANCE_ID`
   - `GRAFANA_OTLP_INGEST_TOKEN`
 - database configuration accepts either local `DATABASE_URL` or split
-  `DB_HOST`, `DB_NAME`, `DB_USER`, and `DB_PASSWORD`; `DB_HOST` may be a
-  Cloud SQL socket path under `/cloudsql`
+  `DB_HOST`, `DB_NAME`, `DB_USER`, and `DB_PASSWORD`; cloud runtimes should
+  leave `DATABASE_URL` unset and the split contract wins whenever those values
+  are populated; `DB_HOST` may be a Cloud SQL socket path under `/cloudsql`
 - the runtime composes the OTLP Basic auth header from the Grafana instance ID
   and ingest token instead of requiring `OTEL_EXPORTER_OTLP_HEADERS`
 - `make run` sources `.env` when present and starts `./cmd/api`

@@ -113,7 +113,26 @@ func TestLoadFromEnvComposesDatabaseURLFromCloudSQLSocket(t *testing.T) {
 	}
 }
 
-func TestLoadDatabaseURLFromEnvPrefersDatabaseURL(t *testing.T) {
+func TestLoadDatabaseURLFromEnvUsesDatabaseURLWhenSplitValuesAreBlank(t *testing.T) {
+	t.Setenv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/platform_blueprint?sslmode=disable")
+	t.Setenv("DB_HOST", "")
+	t.Setenv("DB_NAME", "")
+	t.Setenv("DB_USER", "")
+	t.Setenv("DB_PASSWORD", "")
+
+	var problems []string
+	databaseURL := LoadDatabaseURLFromEnv(&problems)
+	if len(problems) > 0 {
+		t.Fatalf("LoadDatabaseURLFromEnv() problems = %v, want none", problems)
+	}
+
+	want := "postgres://postgres:postgres@localhost:5432/platform_blueprint?sslmode=disable"
+	if databaseURL != want {
+		t.Fatalf("LoadDatabaseURLFromEnv() = %q, want %q", databaseURL, want)
+	}
+}
+
+func TestLoadDatabaseURLFromEnvPrefersSplitValuesWhenConfigured(t *testing.T) {
 	t.Setenv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/platform_blueprint?sslmode=disable")
 	t.Setenv("DB_HOST", "/cloudsql/example-project:europe-west1:platform-rc-db")
 	t.Setenv("DB_NAME", "platform_rc")
@@ -126,7 +145,26 @@ func TestLoadDatabaseURLFromEnvPrefersDatabaseURL(t *testing.T) {
 		t.Fatalf("LoadDatabaseURLFromEnv() problems = %v, want none", problems)
 	}
 
-	want := "postgres://postgres:postgres@localhost:5432/platform_blueprint?sslmode=disable"
+	want := "postgres://api_user:secret@/platform_rc?host=%2Fcloudsql%2Fexample-project%3Aeurope-west1%3Aplatform-rc-db&sslmode=disable"
+	if databaseURL != want {
+		t.Fatalf("LoadDatabaseURLFromEnv() = %q, want %q", databaseURL, want)
+	}
+}
+
+func TestLoadDatabaseURLFromEnvIgnoresInvalidDatabaseURLWhenSplitValuesAreConfigured(t *testing.T) {
+	t.Setenv("DATABASE_URL", "not-a-url")
+	t.Setenv("DB_HOST", "10.10.0.4:5432")
+	t.Setenv("DB_NAME", "platform_rc")
+	t.Setenv("DB_USER", "api_user")
+	t.Setenv("DB_PASSWORD", "secret")
+
+	var problems []string
+	databaseURL := LoadDatabaseURLFromEnv(&problems)
+	if len(problems) > 0 {
+		t.Fatalf("LoadDatabaseURLFromEnv() problems = %v, want none", problems)
+	}
+
+	want := "postgres://api_user:secret@10.10.0.4:5432/platform_rc?sslmode=disable"
 	if databaseURL != want {
 		t.Fatalf("LoadDatabaseURLFromEnv() = %q, want %q", databaseURL, want)
 	}
