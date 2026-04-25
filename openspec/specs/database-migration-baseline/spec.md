@@ -13,13 +13,15 @@ and the `user_profiles` identity contract.
 The repository SHALL provide repo-local database lifecycle commands for the API
 service. At minimum, `make migrate-up`, `make migrate-down`, `make db-seed`,
 `make db-prepare`, and `make sqlc-generate` MUST be available from the
-repository root when `DATABASE_URL` is configured.
+repository root when either local `DATABASE_URL` or split `DB_HOST`, `DB_NAME`,
+`DB_USER`, and `DB_PASSWORD` inputs are configured.
 
 #### Scenario: Operators can apply the schema baseline
 
 - **WHEN** an operator runs `make migrate-up`
 - **THEN** the repository applies the embedded Postgres schema migrations using
-  the configured `DATABASE_URL`
+  the resolved database URL from either local `DATABASE_URL` or the split
+  cloud-runtime database contract
 
 #### Scenario: Developers can prepare a local database baseline
 

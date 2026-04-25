@@ -93,10 +93,11 @@ func LoadFromEnv() (Config, error) {
 }
 
 // LoadDatabaseURLFromEnv returns the Postgres connection string accepted by
-// runtime and migration commands. DATABASE_URL remains supported for local
-// compatibility; cloud runtimes can instead provide split DB_* values.
+// runtime and migration commands. Local workflows can keep using DATABASE_URL.
+// Cloud runtimes should provide the split DB_* contract, which takes priority
+// whenever any non-empty split value is configured.
 func LoadDatabaseURLFromEnv(problems *[]string) string {
-	if databaseURL := strings.TrimSpace(os.Getenv("DATABASE_URL")); databaseURL != "" {
+	if databaseURL := strings.TrimSpace(os.Getenv("DATABASE_URL")); databaseURL != "" && !hasConfiguredSplitDatabaseEnv() {
 		if parseAbsoluteURL("DATABASE_URL", databaseURL, problems) == nil {
 			return ""
 		}
@@ -104,6 +105,20 @@ func LoadDatabaseURLFromEnv(problems *[]string) string {
 		return databaseURL
 	}
 
+	return loadSplitDatabaseURL(problems)
+}
+
+func hasConfiguredSplitDatabaseEnv() bool {
+	for _, key := range []string{"DB_HOST", "DB_NAME", "DB_USER", "DB_PASSWORD"} {
+		if strings.TrimSpace(os.Getenv(key)) != "" {
+			return true
+		}
+	}
+
+	return false
+}
+
+func loadSplitDatabaseURL(problems *[]string) string {
 	dbHost := requireNonEmptyEnv("DB_HOST", problems)
 	dbName := requireNonEmptyEnv("DB_NAME", problems)
 	dbUser := requireNonEmptyEnv("DB_USER", problems)
